@@ -1,5 +1,6 @@
 import json
-from typing import Dict, Any
+from typing import Any, Dict
+
 from api.core.genai_client import genai_client
 
 M1_PROMPT_TEMPLATE = """
@@ -29,10 +30,7 @@ M1_PROMPT_TEMPLATE = """
 M1_SCHEMA = {
     "type": "object",
     "properties": {
-        "analysis_process": {
-            "type": "string",
-            "description": "分析思路說明"
-        },
+        "analysis_process": {"type": "string", "description": "分析思路說明"},
         "matched_warnings": {
             "type": "array",
             "items": {
@@ -40,45 +38,36 @@ M1_SCHEMA = {
                 "properties": {
                     "warning_id": {"type": "integer"},
                     "warning_name": {"type": "string"},
-                    "match_confidence": {"type": "number"}
-                }
-            }
+                    "match_confidence": {"type": "number"},
+                },
+            },
         },
-        "overall_confidence": {
-            "type": "number",
-            "minimum": 0,
-            "maximum": 10
-        },
-        "risk_level": {
-            "type": "string",
-            "enum": ["low", "moderate", "high", "urgent"]
-        },
-        "recommendations": {
-            "type": "array",
-            "items": {"type": "string"}
-        }
+        "overall_confidence": {"type": "number", "minimum": 0, "maximum": 10},
+        "risk_level": {"type": "string", "enum": ["low", "moderate", "high", "urgent"]},
+        "recommendations": {"type": "array", "items": {"type": "string"}},
     },
-    "required": ["analysis_process", "matched_warnings", "overall_confidence", "risk_level"]
+    "required": ["analysis_process", "matched_warnings", "overall_confidence", "risk_level"],
 }
+
 
 async def analyze_symptoms(user_input: str) -> Dict[str, Any]:
     """Analyze user-described symptoms against dementia warning signs"""
-    
+
     prompt = M1_PROMPT_TEMPLATE.format(user_input=user_input)
-    
+
     try:
         result = await genai_client.generate_response(prompt, M1_SCHEMA)
         response_data = json.loads(result["content"])
-        
+
         # Add metadata
         response_data["metadata"] = {
             "module_id": "M1",
             "provider": result["provider"],
-            "tokens_used": result["tokens_used"]
+            "tokens_used": result["tokens_used"],
         }
-        
+
         return response_data
-        
+
     except Exception as e:
         # Fallback response
         return {
@@ -87,5 +76,5 @@ async def analyze_symptoms(user_input: str) -> Dict[str, Any]:
             "overall_confidence": 0,
             "risk_level": "low",
             "recommendations": ["建議諮詢專業醫療人員"],
-            "error": str(e)
+            "error": str(e),
         }

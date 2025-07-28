@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>LINE Bot Webhook 測試</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 50px auto; padding: 20px; }
+        .url { background: #f0f0f0; padding: 10px; border-radius: 5px; font-family: monospace; }
+        .button { background: #005073; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; }
+    </style>
+</head>
+<body>
+    <h1>🔒 LINE Bot HTTPS Webhook 解決方案</h1>
+    
+    <h2>問題：LINE Bot 需要 HTTPS URL</h2>
+    <p>你的 URL: <span class="url">http://172.31.97.66:5000/callback</span></p>
+    <p>❌ 錯誤：需要 HTTPS URL</p>
+    
+    <h2>✅ 解決方案</h2>
+    
+    <h3>方案 1：使用 localhost.run</h3>
+    <p>在終端執行：</p>
+    <div class="url">ssh -R 80:localhost:5000 localhost.run</div>
+    <p>會得到類似：<span class="url">https://xxx.localhost.run</span></p>
+    
+    <h3>方案 2：使用 Ngrok（推薦）</h3>
+    <ol>
+        <li>註冊 <a href="https://ngrok.com" target="_blank">Ngrok 帳號</a></li>
+        <li>下載 ngrok</li>
+        <li>執行：<span class="url">ngrok http 5000</span></li>
+        <li>使用提供的 HTTPS URL</li>
+    </ol>
+    
+    <h3>方案 3：部署到 Replit（最穩定）</h3>
+    <p>將代碼部署到 Replit，自動獲得 HTTPS URL</p>
+    
+    <h2>📱 Webhook 設定</h2>
+    <p>在 LINE Developers Console 中設定：</p>
+    <div class="url">https://your-tunnel-url.com/callback</div>
+    
+    <h2>🧪 測試指令</h2>
+    <p>在 LINE 中發送：</p>
+    <ul>
+        <li>"媽媽常忘記關瓦斯爐" - M1+M3 整合分析</li>
+        <li>"爸爸懷疑有人偷東西" - M3 妄想症狀分析</li>
+        <li>"health" - 系統健康檢查</li>
+    </ul>
+</body>
+</html>

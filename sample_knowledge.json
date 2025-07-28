@@ -1,0 +1,26 @@
+{
+  "chunks": [
+    {
+      "chunk_id": "sample-001",
+      "title": "失智症日常照護",
+      "content": "失智症患者的日常照護需要耐心和技巧，包括協助洗澡、用餐、服藥等基本生活需求。",
+      "chunk_type": "care_guide",
+      "keywords": [
+        "日常照護",
+        "生活協助",
+        "基本需求"
+      ]
+    },
+    {
+      "chunk_id": "sample-002",
+      "title": "環境安全設計",
+      "content": "為失智症患者設計安全的居住環境很重要，包括移除障礙物、增加照明、安裝扶手等。",
+      "chunk_type": "safety_guide",
+      "keywords": [
+        "環境安全",
+        "居住設計",
+        "障礙物"
+      ]
+    }
+  ]
+}

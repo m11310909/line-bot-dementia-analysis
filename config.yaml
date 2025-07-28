@@ -1,0 +1,15 @@
+api:
+  debug: true
+  title: Enhanced XAI Flex API
+  version: 2.0.0
+flex_message:
+  default_template: bubble
+  enable_xai: true
+  max_components: 5
+knowledge_base:
+  cache_enabled: true
+  confidence_threshold: 0.5
+  max_results: 10
+logging:
+  file: api.log
+  level: INFO

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>XAI Flex Message 样式预览</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f0f0f0; }
+        .style-card { 
+            margin: 20px 0; 
+            padding: 20px; 
+            background: white; 
+            border-radius: 10px; 
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .warning { border-left: 5px solid #FF6B6B; }
+        .service { border-left: 5px solid #4ECDC4; }  
+        .info { border-left: 5px solid #666666; }
+        .color-demo { 
+            display: inline-block; 
+            width: 30px; 
+            height: 30px; 
+            border-radius: 50%; 
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎨 XAI Flex Message 样式预览</h1>
+    
+    <div class="style-card warning">
+        <h2>🔴 失智症警讯卡片 (warning_sign)</h2>
+        <div class="color-demo" style="background: #FFE5E5;"></div>
+        <div class="color-demo" style="background: #FF6B6B;"></div>
+        <p><strong>用途：</strong>失智症十大警讯、紧急提醒</p>
+        <p><strong>特色：</strong>醒目红色、高信心度指标、XAI解释区块</p>
+        <p><strong>效果：</strong>引起注意、传达紧迫性</p>
+    </div>
+    
+    <div class="style-card service">
+        <h2>🔵 长照服务卡片 (service_info)</h2>
+        <div class="color-demo" style="background: #E5F7F6;"></div>
+        <div class="color-demo" style="background: #4ECDC4;"></div>
+        <p><strong>用途：</strong>长照2.0服务、申请流程、官方信息</p>
+        <p><strong>特色：</strong>专业蓝绿色、权威来源标示</p>
+        <p><strong>效果：</strong>信任感、专业性</p>
+    </div>
+    
+    <div class="style-card info">
+        <h2>⚪ 一般信息卡片 (info)</h2>
+        <div class="color-demo" style="background: #F5F5F5;"></div>
+        <div class="color-demo" style="background: #666666;"></div>
+        <p><strong>用途：</strong>一般性信息、默认样式</p>
+        <p><strong>特色：</strong>中性灰色、简洁设计</p>
+        <p><strong>效果：</strong>清晰易读、不抢夺注意力</p>
+    </div>
+    
+    <div class="style-card">
+        <h2>🎠 轮播效果 (carousel)</h2>
+        <p><strong>用途：</strong>多张卡片组合显示</p>
+        <p><strong>特色：</strong>左右滑动、最多5张卡片</p>
+        <p><strong>效果：</strong>节省空间、丰富信息</p>
+    </div>
+    
+    <h2>🧪 测试链接</h2>
+    <ul>
+        <li><a href="http://localhost:8001/demo">完整演示页面</a></li>
+        <li><a href="https://developers.line.biz/flex-simulator/">LINE Flex Simulator</a></li>
+    </ul>
+</body>
+</html>

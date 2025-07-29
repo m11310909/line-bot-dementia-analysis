@@ -1,0 +1,26 @@
+{
+  "module": "M2",
+  "test_cases": [
+    {
+      "id": "M2_TC_001",
+      "input": "開始會忘記吃藥，但提醒後還記得，偶爾會重複問同樣的問題",
+      "expected_stage": "early",
+      "symptoms_expected": ["cognitive"],
+      "tags": ["輕度認知障礙", "早期症狀"]
+    },
+    {
+      "id": "M2_TC_002", 
+      "input": "晚上會起來走動，白天嗜睡，有時認不得家人",
+      "expected_stage": "middle",
+      "symptoms_expected": ["behavioral", "cognitive"],
+      "tags": ["日夜顛倒", "認知退化"]
+    },
+    {
+      "id": "M2_TC_003",
+      "input": "已經無法自己進食，需要全天候照護，很少有清醒的時候",
+      "expected_stage": "late", 
+      "symptoms_expected": ["behavioral", "cognitive", "psychological"],
+      "tags": ["重度失能", "全面照護"]
+    }
+  ]
+}

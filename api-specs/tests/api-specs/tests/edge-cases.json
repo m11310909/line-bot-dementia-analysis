@@ -1,0 +1,24 @@
+{
+  "edge_cases": [
+    {
+      "id": "EDGE_001",
+      "description": "極短輸入",
+      "input": "忘記",
+      "expected_error": "E2001",
+      "expected_behavior": "觸發 E2001 錯誤，要求更多描述"
+    },
+    {
+      "id": "EDGE_002",
+      "description": "無關輸入", 
+      "input": "今天天氣很好",
+      "expected_error": "E3001",
+      "expected_behavior": "觸發 E3001 錯誤，提供快速選項"
+    },
+    {
+      "id": "EDGE_003",
+      "description": "多重症狀",
+      "input": "她會忘記事情、晚上不睡覺、還會罵人、不認得我",
+      "expected_behavior": "識別主要症狀，建議查看 M2 或 M3"
+    }
+  ]
+}

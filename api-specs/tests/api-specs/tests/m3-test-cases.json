@@ -1,0 +1,26 @@
+{
+  "module": "M3",
+  "test_cases": [
+    {
+      "id": "M3_TC_001",
+      "input": "她總說有人要害她，晚上不敢睡覺",
+      "expected_category": "delusion",
+      "expected_severity": "high",
+      "tags": ["被害妄想", "睡眠障礙"]
+    },
+    {
+      "id": "M3_TC_002",
+      "input": "最近變得很暴躁，一點小事就大發脾氣",
+      "expected_category": "agitation", 
+      "expected_severity": "medium",
+      "tags": ["情緒激動", "行為問題"]
+    },
+    {
+      "id": "M3_TC_003",
+      "input": "整天都很沮喪，什麼都不想做",
+      "expected_category": "depression",
+      "expected_severity": "medium",
+      "tags": ["憂鬱情緒", "活動減少"]
+    }
+  ]
+}

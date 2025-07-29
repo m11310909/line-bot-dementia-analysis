@@ -1,0 +1,17 @@
+{
+  "ERROR_CODES": {
+    "E1001": { "message": "系統暫時無法服務", "suggestion": "請稍後再試" },
+    "E1002": { "message": "API 版本不支援", "suggestion": "請更新應用程式" },
+    "E1003": { "message": "請求逾時", "suggestion": "請檢查網路連線" },
+    "E2001": { "message": "輸入內容過短", "suggestion": "請提供更多描述" },
+    "E2002": { "message": "輸入內容無法理解", "suggestion": "請用其他方式描述症狀" },
+    "E2003": { "message": "缺少必要資訊", "suggestion": "請補充相關細節" },
+    "E3001": { "message": "無法判斷症狀類型", "suggestion": "請選擇下方快速選項" },
+    "E3002": { "message": "信心度過低", "suggestion": "建議諮詢專業人員" },
+    "E3003": { "message": "AI 模型暫時無法使用", "suggestion": "使用簡易模式" },
+    "E4001": { "message": "無相符警訊", "suggestion": "查看一般照護建議" },
+    "E4002": { "message": "病程無法判定", "suggestion": "提供更多行為描述" },
+    "E4003": { "message": "BPSD 類型不明", "suggestion": "選擇最接近的症狀" },
+    "E4004": { "message": "無相關照護資源", "suggestion": "聯繫在地服務中心" }
+  }
+}

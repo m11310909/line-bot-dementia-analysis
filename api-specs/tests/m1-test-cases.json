@@ -1,0 +1,26 @@
+{
+  "module": "M1",
+  "test_cases": [
+    {
+      "id": "M1_TC_001",
+      "input": "我媽最近一整天都在找東西，她說人家偷了但明明東西就在抽屜",
+      "expected_code": "M1-07",
+      "expected_severity": "medium",
+      "tags": ["物品擺放混亂", "被偷妄想"]
+    },
+    {
+      "id": "M1_TC_002",
+      "input": "他剛吃完藥馬上又說還沒吃，要我再拿一次",
+      "expected_code": "M1-01",
+      "expected_severity": "high",
+      "tags": ["記憶力衰退", "重複行為"]
+    },
+    {
+      "id": "M1_TC_003",
+      "input": "最近她突然不太會用手機，連怎麼打電話都忘了",
+      "expected_code": "M1-03",
+      "expected_severity": "medium",
+      "tags": ["熟悉事務困難", "技能退化"]
+    }
+  ]
+}

@@ -1,20 +1,34 @@
 from abc import ABC, abstractmethod
 from typing import Dict, Any, List
-from pydantic import BaseModel
 import yaml
 from pathlib import Path
 
-class AnalysisResult(BaseModel):
-    matched_categories: List[str] = []
-    category_name: str = ""
-    confidence: float = 0.0
-    severity: int = 1  # 1-5
-    user_description: str = ""
-    normal_aging: str = ""
-    warning_sign: str = ""
-    recommendations: List[str] = []
-    require_medical_attention: bool = False
-    disclaimer: str = "此分析僅供參考，請諮詢專業醫師進行正式評估"
+class AnalysisResult:
+    def __init__(self, **kwargs):
+        self.matched_categories = kwargs.get('matched_categories', [])
+        self.category_name = kwargs.get('category_name', '')
+        self.confidence = kwargs.get('confidence', 0.0)
+        self.severity = kwargs.get('severity', 1)
+        self.user_description = kwargs.get('user_description', '')
+        self.normal_aging = kwargs.get('normal_aging', '')
+        self.warning_sign = kwargs.get('warning_sign', '')
+        self.recommendations = kwargs.get('recommendations', [])
+        self.require_medical_attention = kwargs.get('require_medical_attention', False)
+        self.disclaimer = kwargs.get('disclaimer', '此分析僅供參考，請諮詢專業醫師進行正式評估')
+    
+    def dict(self):
+        return {
+            'matched_categories': self.matched_categories,
+            'category_name': self.category_name,
+            'confidence': self.confidence,
+            'severity': self.severity,
+            'user_description': self.user_description,
+            'normal_aging': self.normal_aging,
+            'warning_sign': self.warning_sign,
+            'recommendations': self.recommendations,
+            'require_medical_attention': self.require_medical_attention,
+            'disclaimer': self.disclaimer
+        }
 
 class BaseAnalyzer(ABC):
     def __init__(self, gemini_service=None):

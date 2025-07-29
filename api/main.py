@@ -154,3 +154,46 @@ if __name__ == "__main__":
     import uvicorn
     print(f"🚀 啟動失智症分析 API 服務於端口 {settings.api_port}")
     uvicorn.run(app, host="0.0.0.0", port=settings.api_port)
+# 在 main.py 末尾添加 webhook 端點
+cat >> main.py << 'EOF'
+
+# LINE Bot Webhook 端點
+@app.post("/webhook")
+async def line_webhook(request: Request):
+    """處理 LINE Bot webhook 請求"""
+    try:
+        print("📨 收到 LINE webhook 請求")
+
+        body = await request.body()
+        webhook_data = json.loads(body.decode('utf-8'))
+
+        events = webhook_data.get('events', [])
+        print(f"🎯 收到 {len(events)} 個事件")
+
+        for event in events:
+            if event.get('type') == 'message':
+                message = event.get('message', {})
+                if message.get('type') == 'text':
+                    user_text = message.get('text', '')
+                    reply_token = event.get('replyToken')
+
+                    print(f"👤 使用者訊息: {user_text}")
+                    print(f"🔄 Reply Token: {reply_token}")
+
+                    # 調用現有的分析功能
+                    # 這裡需要根據你的 main.py 結構調整
+                    await process_line_message(user_text, reply_token)
+
+        return {"status": "ok"}
+
+    except Exception as e:
+        print(f"❌ Webhook 錯誤: {e}")
+        return {"status": "ok"}
+
+async def process_line_message(text: str, reply_token: str):
+    """處理 LINE 訊息 - 需要根據你的系統調整"""
+    print(f"🧠 開始處理訊息: {text}")
+    # 這裡應該調用你的 XAI 分析功能
+    # 然後發送 Flex Message 回覆
+    pass
+EOF

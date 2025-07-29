@@ -1,0 +1,360 @@
+{
+  "type": "carousel",
+  "contents": [
+    {
+      "type": "bubble",
+      "size": "mega",
+      "header": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "日常照護任務",
+            "weight": "bold",
+            "size": "20px",
+            "color": "#FFFFFF",
+            "align": "center"
+          },
+          {
+            "type": "text",
+            "text": "{{stage_name}}",
+            "size": "16px",
+            "color": "#FFFFFF",
+            "align": "center",
+            "margin": "sm"
+          }
+        ],
+        "backgroundColor": "#3B82F6",
+        "paddingAll": "20px"
+      },
+      "body": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "重點任務",
+            "weight": "bold",
+            "size": "18px",
+            "color": "#3B82F6",
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "1",
+                    "size": "16px",
+                    "color": "#FFFFFF",
+                    "weight": "bold",
+                    "align": "center",
+                    "backgroundColor": "#3B82F6",
+                    "cornerRadius": "50px",
+                    "paddingAll": "8px",
+                    "flex": 0
+                  },
+                  {
+                    "type": "text",
+                    "text": "{{task_1_title}}",
+                    "size": "16px",
+                    "color": "#333333",
+                    "weight": "bold",
+                    "flex": 1,
+                    "margin": "md"
+                  }
+                ],
+                "margin": "sm"
+              },
+              {
+                "type": "text",
+                "text": "{{task_1_description}}",
+                "size": "14px",
+                "color": "#666666",
+                "wrap": true,
+                "margin": "sm",
+                "paddingStart": "40px"
+              },
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "2",
+                    "size": "16px",
+                    "color": "#FFFFFF",
+                    "weight": "bold",
+                    "align": "center",
+                    "backgroundColor": "#3B82F6",
+                    "cornerRadius": "50px",
+                    "paddingAll": "8px",
+                    "flex": 0
+                  },
+                  {
+                    "type": "text",
+                    "text": "{{task_2_title}}",
+                    "size": "16px",
+                    "color": "#333333",
+                    "weight": "bold",
+                    "flex": 1,
+                    "margin": "md"
+                  }
+                ],
+                "margin": "md"
+              },
+              {
+                "type": "text",
+                "text": "{{task_2_description}}",
+                "size": "14px",
+                "color": "#666666",
+                "wrap": true,
+                "margin": "sm",
+                "paddingStart": "40px"
+              },
+              {
+                "type": "box",
+                "layout": "horizontal",
+                "contents": [
+                  {
+                    "type": "text",
+                    "text": "3",
+                    "size": "16px",
+                    "color": "#FFFFFF",
+                    "weight": "bold",
+                    "align": "center",
+                    "backgroundColor": "#3B82F6",
+                    "cornerRadius": "50px",
+                    "paddingAll": "8px",
+                    "flex": 0
+                  },
+                  {
+                    "type": "text",
+                    "text": "{{task_3_title}}",
+                    "size": "16px",
+                    "color": "#333333",
+                    "weight": "bold",
+                    "flex": 1,
+                    "margin": "md"
+                  }
+                ],
+                "margin": "md"
+              },
+              {
+                "type": "text",
+                "text": "{{task_3_description}}",
+                "size": "14px",
+                "color": "#666666",
+                "wrap": true,
+                "margin": "sm",
+                "paddingStart": "40px"
+              }
+            ],
+            "backgroundColor": "#F8FAFC",
+            "paddingAll": "15px",
+            "cornerRadius": "8px",
+            "margin": "sm"
+          },
+          {
+            "type": "separator",
+            "margin": "xl"
+          },
+          {
+            "type": "text",
+            "text": "📋 常見挑戰",
+            "weight": "bold",
+            "size": "16px",
+            "color": "#F59E0B",
+            "margin": "md"
+          },
+          {
+            "type": "text",
+            "text": "{{common_challenges}}",
+            "size": "14px",
+            "color": "#666666",
+            "wrap": true,
+            "margin": "sm"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      },
+      "footer": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "button",
+            "style": "primary",
+            "height": "sm",
+            "action": {
+              "type": "uri",
+              "label": "查看照護地圖",
+              "uri": "https://liff.line.me/your-liff-url/care-map"
+            },
+            "color": "#3B82F6",
+            "margin": "sm"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "button",
+                "style": "secondary",
+                "height": "sm",
+                "action": {
+                  "type": "postback",
+                  "label": "支援服務",
+                  "data": "care_support=services"
+                },
+                "flex": 1
+              },
+              {
+                "type": "button",
+                "style": "secondary",
+                "height": "sm",
+                "action": {
+                  "type": "postback",
+                  "label": "資源清單",
+                  "data": "care_support=resources"
+                },
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      }
+    },
+    {
+      "type": "bubble",
+      "size": "mega",
+      "header": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "緊急應對指南",
+            "weight": "bold",
+            "size": "20px",
+            "color": "#FFFFFF",
+            "align": "center"
+          }
+        ],
+        "backgroundColor": "#E60012",
+        "paddingAll": "20px"
+      },
+      "body": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "🚨 緊急情況處理",
+            "weight": "bold",
+            "size": "18px",
+            "color": "#E60012",
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "vertical",
+            "contents": [
+              {
+                "type": "text",
+                "text": "跌倒意外",
+                "size": "16px",
+                "color": "#333333",
+                "weight": "bold"
+              },
+              {
+                "type": "text",
+                "text": "立即評估意識、檢查外傷、必要時送醫",
+                "size": "14px",
+                "color": "#666666",
+                "wrap": true,
+                "margin": "xs"
+              },
+              {
+                "type": "separator",
+                "margin": "md"
+              },
+              {
+                "type": "text",
+                "text": "行為激動",
+                "size": "16px",
+                "color": "#333333",
+                "weight": "bold",
+                "margin": "md"
+              },
+              {
+                "type": "text",
+                "text": "保持冷靜、移除危險物品、轉移注意力",
+                "size": "14px",
+                "color": "#666666",
+                "wrap": true,
+                "margin": "xs"
+              },
+              {
+                "type": "separator",
+                "margin": "md"
+              },
+              {
+                "type": "text",
+                "text": "走失風險",
+                "size": "16px",
+                "color": "#333333",
+                "weight": "bold",
+                "margin": "md"
+              },
+              {
+                "type": "text",
+                "text": "立即報警、聯繫社區、檢查常去地點",
+                "size": "14px",
+                "color": "#666666",
+                "wrap": true,
+                "margin": "xs"
+              }
+            ],
+            "backgroundColor": "#FFF0F0",
+            "paddingAll": "15px",
+            "cornerRadius": "8px",
+            "margin": "sm"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      },
+      "footer": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "button",
+            "style": "primary",
+            "height": "sm",
+            "action": {
+              "type": "uri",
+              "label": "緊急聯絡清單",
+              "uri": "https://liff.line.me/your-liff-url/emergency-contacts"
+            },
+            "color": "#E60012"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      }
+    }
+  ]
+}

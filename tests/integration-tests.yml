@@ -1,0 +1,20 @@
+Integration_Tests:
+- AI_Response_Parsing:
+    - 測試各種 confidence_score 值的處理
+    - 驗證模組跳轉邏輯正確性
+    - 檢查 fallback 機制運作
+
+- Flex_Message_Generation:
+    - 所有變數替換正確完成
+    - JSON 格式驗證無誤
+    - 視覺呈現符合設計規範
+
+- LIFF_Integration:
+    - URL 生成正確
+    - 參數傳遞完整
+    - 回調處理正常
+
+- Error_Handling:
+    - 網路錯誤處理
+    - JSON 解析錯誤處理
+    - AI 服務不可用時的處理

@@ -1,0 +1,39 @@
+// === Design System Tokens ===
+
+// Color Tokens
+$color-primary: #007BFF;      // Primary blue
+$color-success: #28A745;      // Success green  
+$color-danger: #DC3545;       // Danger red
+$color-warning: #FFC107;      // Warning yellow
+$color-info: #17A2B8;         // Info teal
+$color-gray-100: #F8F9FA;     // Lightest gray
+$color-gray-600: #6C757D;     // Standard gray
+$color-gray-900: #212529;     // Darkest gray
+
+// Typography Tokens (60+ friendly)
+$font-family-primary: 'Noto Sans TC', sans-serif;
+$font-size-base: 18px;        // Base font (60+ friendly)
+$font-size-lg: 20px;          // Large title
+$font-size-md: 18px;          // Standard body
+$font-size-sm: 16px;          // Secondary text
+$font-size-xs: 14px;          // Caption text
+$line-height-base: 1.6;       // Accessible line height
+
+// Spacing Tokens
+$spacing-unit: 8px;           // Base unit
+$spacing-xs: 4px;             // 0.5x
+$spacing-sm: 8px;             // 1x
+$spacing-md: 16px;            // 2x
+$spacing-lg: 24px;            // 3x
+$spacing-xl: 32px;            // 4x
+
+// Border Radius Tokens
+$radius-sm: 4px;              // Small radius
+$radius-md: 8px;              // Standard radius
+$radius-lg: 16px;             // Large radius
+$radius-full: 999px;          // Full radius
+
+// Component Specific
+$icon-size-standard: 20px;    // LINE Flex standard
+$bubble-max-width: 400px;     // LINE Bubble limit
+$card-min-height: 60px;       // Touch target size

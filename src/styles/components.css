@@ -1,0 +1,124 @@
+/* === Design System Component Classes === */
+
+/* Text Components */
+.title--lg-bold { font-size: 20px; font-weight: bold; line-height: 1.4; }
+.title--md-bold { font-size: 18px; font-weight: bold; line-height: 1.4; }
+.title--sm-regular { font-size: 16px; font-weight: normal; line-height: 1.4; }
+
+.body--lg-regular { font-size: 18px; font-weight: normal; line-height: 1.6; }
+.body--md-regular { font-size: 18px; font-weight: normal; line-height: 1.6; }
+.body--sm-light { font-size: 16px; font-weight: 300; line-height: 1.6; }
+
+.caption--xs-gray { font-size: 14px; color: #6C757D; line-height: 1.5; }
+.caption--xs-blue { font-size: 14px; color: #007BFF; line-height: 1.5; }
+.caption--xs-red { font-size: 14px; color: #DC3545; line-height: 1.5; }
+
+/* Icon Components */
+.alert-icon--red { color: #DC3545; width: 20px; height: 20px; }
+.alert-icon--yellow { color: #FFC107; width: 20px; height: 20px; }
+.stage-icon--blue { color: #007BFF; width: 20px; height: 20px; }
+.stage-icon--green { color: #28A745; width: 20px; height: 20px; }
+.support-icon--green { color: #28A745; width: 20px; height: 20px; }
+.support-icon--purple { color: #6F42C1; width: 20px; height: 20px; }
+
+/* Container Components */
+.bubble-container--basic {
+  background: #F8F9FA;
+  border-radius: 16px;
+  padding: 16px;
+  max-width: 400px;
+  margin: 8px 0;
+}
+
+.bubble-container--hero {
+  background: linear-gradient(135deg, #007BFF, #0056B3);
+  color: white;
+  border-radius: 16px;
+  padding: 24px 16px;
+  max-width: 400px;
+  margin: 8px 0;
+}
+
+.card-container--default {
+  background: white;
+  border: 1px solid #DEE2E6;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+  min-height: 60px;
+}
+
+.card-container--hover {
+  background: white;
+  border: 1px solid #007BFF;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 8px 0;
+  box-shadow: 0 2px 8px rgba(0,123,255,0.15);
+  transition: all 0.2s ease;
+}
+
+.list-item-row--basic {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #E9ECEF;
+  min-height: 48px;
+}
+
+.list-item-row--icon {
+  display: flex;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid #E9ECEF;
+  min-height: 48px;
+  gap: 12px;
+}
+
+/* Interactive Components */
+.button--lg-primary {
+  background: #007BFF;
+  color: white;
+  border: none;
+  border-radius: 8px;
+  padding: 16px 24px;
+  font-size: 18px;
+  font-weight: 600;
+  min-height: 56px;
+  cursor: pointer;
+}
+
+.button--md-secondary {
+  background: transparent;
+  color: #007BFF;
+  border: 2px solid #007BFF;
+  border-radius: 8px;
+  padding: 12px 20px;
+  font-size: 16px;
+  font-weight: 500;
+  min-height: 48px;
+  cursor: pointer;
+}
+
+.quick-reply--text {
+  background: #F8F9FA;
+  color: #495057;
+  border: 1px solid #DEE2E6;
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-size: 14px;
+  display: inline-block;
+  margin: 4px;
+  cursor: pointer;
+}
+
+/* Responsive Design */
+@media (max-width: 374px) {
+  .title--lg-bold { font-size: 18px; }
+  .body--md-regular { font-size: 16px; }
+}
+
+@media (min-width: 768px) {
+  .title--lg-bold { font-size: 22px; }
+  .body--md-regular { font-size: 19px; }
+}

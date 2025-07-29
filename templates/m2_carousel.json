@@ -1,0 +1,362 @@
+{
+  "type": "carousel",
+  "contents": [
+    {
+      "type": "bubble",
+      "size": "mega",
+      "header": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "早期階段",
+            "weight": "bold",
+            "size": "20px",
+            "color": "#1DB446",
+            "align": "center"
+          }
+        ],
+        "backgroundColor": "#F0F8F0",
+        "paddingAll": "20px"
+      },
+      "body": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "icon",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+                "size": "20px"
+              },
+              {
+                "type": "text",
+                "text": "輕微記憶問題",
+                "size": "18px",
+                "color": "#333333",
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "icon",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+                "size": "20px"
+              },
+              {
+                "type": "text",
+                "text": "偶爾詞彙困難",
+                "size": "18px",
+                "color": "#333333",
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "icon",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+                "size": "20px"
+              },
+              {
+                "type": "text",
+                "text": "輕微方向感困擾",
+                "size": "18px",
+                "color": "#333333",
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "separator",
+            "margin": "xl"
+          },
+          {
+            "type": "text",
+            "text": "此階段重點在於早期發現和預防",
+            "size": "16px",
+            "color": "#666666",
+            "wrap": true,
+            "margin": "md"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      },
+      "footer": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "button",
+            "style": "primary",
+            "height": "sm",
+            "action": {
+              "type": "uri",
+              "label": "了解更多",
+              "uri": "https://liff.line.me/your-liff-url/early-stage"
+            },
+            "color": "#1DB446"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      }
+    },
+    {
+      "type": "bubble",
+      "size": "mega",
+      "header": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "中期階段",
+            "weight": "bold",
+            "size": "20px",
+            "color": "#FF6B35",
+            "align": "center"
+          }
+        ],
+        "backgroundColor": "#FFF5F0",
+        "paddingAll": "20px"
+      },
+      "body": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "icon",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+                "size": "20px"
+              },
+              {
+                "type": "text",
+                "text": "明顯記憶缺失",
+                "size": "18px",
+                "color": "#333333",
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "icon",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+                "size": "20px"
+              },
+              {
+                "type": "text",
+                "text": "日常活動困難",
+                "size": "18px",
+                "color": "#333333",
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "icon",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+                "size": "20px"
+              },
+              {
+                "type": "text",
+                "text": "情緒變化增加",
+                "size": "18px",
+                "color": "#333333",
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "separator",
+            "margin": "xl"
+          },
+          {
+            "type": "text",
+            "text": "需要更多照護支援和安全措施",
+            "size": "16px",
+            "color": "#666666",
+            "wrap": true,
+            "margin": "md"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      },
+      "footer": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "button",
+            "style": "primary",
+            "height": "sm",
+            "action": {
+              "type": "uri",
+              "label": "了解更多",
+              "uri": "https://liff.line.me/your-liff-url/middle-stage"
+            },
+            "color": "#FF6B35"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      }
+    },
+    {
+      "type": "bubble",
+      "size": "mega",
+      "header": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "晚期階段",
+            "weight": "bold",
+            "size": "20px",
+            "color": "#E60012",
+            "align": "center"
+          }
+        ],
+        "backgroundColor": "#FFF0F0",
+        "paddingAll": "20px"
+      },
+      "body": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "icon",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+                "size": "20px"
+              },
+              {
+                "type": "text",
+                "text": "嚴重認知功能下降",
+                "size": "18px",
+                "color": "#333333",
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "icon",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+                "size": "20px"
+              },
+              {
+                "type": "text",
+                "text": "需要全天候照護",
+                "size": "18px",
+                "color": "#333333",
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "icon",
+                "url": "https://scdn.line-apps.com/n/channel_devcenter/img/fx/review_gold_star_28.png",
+                "size": "20px"
+              },
+              {
+                "type": "text",
+                "text": "身體功能衰退",
+                "size": "18px",
+                "color": "#333333",
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "md"
+          },
+          {
+            "type": "separator",
+            "margin": "xl"
+          },
+          {
+            "type": "text",
+            "text": "著重舒適照護和生活品質維持",
+            "size": "16px",
+            "color": "#666666",
+            "wrap": true,
+            "margin": "md"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      },
+      "footer": {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "button",
+            "style": "primary",
+            "height": "sm",
+            "action": {
+              "type": "uri",
+              "label": "了解更多",
+              "uri": "https://liff.line.me/your-liff-url/late-stage"
+            },
+            "color": "#E60012"
+          }
+        ],
+        "spacing": "sm",
+        "paddingAll": "20px"
+      }
+    }
+  ]
+}

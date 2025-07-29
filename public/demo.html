@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Design System Demo</title>
+    <link rel="stylesheet" href="../src/styles/components.css">
+    <style>
+        body { font-family: 'Noto Sans TC', sans-serif; margin: 20px; background: #f5f5f5; }
+        .demo-section { margin: 30px 0; padding: 20px; background: white; border-radius: 8px; }
+        .demo-title { font-size: 24px; font-weight: bold; margin-bottom: 20px; color: #212529; }
+    </style>
+</head>
+<body>
+    <h1 class="demo-title">🎨 Design System Component Demo</h1>
+    
+    <div class="demo-section">
+        <h2 class="title--lg-bold">Typography Components</h2>
+        <h3 class="title--md-bold">Section Title (MD Bold)</h3>
+        <p class="body--md-regular">This is standard body text that demonstrates readable content for 60+ users with proper line height and font size.</p>
+        <p class="caption--xs-gray">This is caption text in gray for supplementary information.</p>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="title--lg-bold">Container Components</h2>
+        
+        <div class="bubble-container--basic">
+            <h3 class="title--sm-regular">Basic Bubble Container</h3>
+            <p class="body--sm-light">Standard message container with proper padding and max-width constraints.</p>
+        </div>
+
+        <div class="bubble-container--hero">
+            <h3 class="title--md-bold">Hero Bubble Container</h3>
+            <p class="body--md-regular">Featured content with gradient background for important announcements.</p>
+        </div>
+
+        <div class="card-container--default">
+            <h3 class="title--sm-regular">Default Card</h3>
+            <p class="body--sm-light">Standard card container for content organization.</p>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="title--lg-bold">Interactive Components</h2>
+        
+        <button class="button--lg-primary">Primary Action Button</button>
+        <button class="button--md-secondary">Secondary Action</button>
+        
+        <div style="margin-top: 15px;">
+            <span class="quick-reply--text">Quick Reply 1</span>
+            <span class="quick-reply--text">Quick Reply 2</span>
+            <span class="quick-reply--text">Quick Reply 3</span>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="title--lg-bold">List Components</h2>
+        
+        <div class="list-item-row--basic">
+            <span class="body--md-regular">Basic List Item</span>
+        </div>
+        
+        <div class="list-item-row--icon">
+            <span class="support-icon--green">✓</span>
+            <span class="body--md-regular">List Item with Icon</span>
+        </div>
+    </div>
+
+    <div class="demo-section">
+        <h2 class="title--lg-bold">Module Examples</h2>
+        
+        <!-- M1: Alert Card Example -->
+        <div class="card-container--default">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <span class="alert-icon--red" style="font-size: 20px;">⚠️</span>
+                <div>
+                    <h3 class="title--md-bold">重要提醒</h3>
+                    <p class="body--md-regular">這是一個警示訊息範例，使用標準的 M1 模組設計。</p>
+                    <p class="caption--xs-gray">請注意相關事項</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- M3: Category Card Example -->
+        <div class="bubble-container--basic">
+            <h3 class="title--sm-regular">分類選項</h3>
+            <div class="list-item-row--icon">
+                <span class="stage-icon--blue" style="font-size: 20px;">📋</span>
+                <span class="body--md-regular">任務管理</span>
+            </div>
+            <div class="list-item-row--icon">
+                <span class="support-icon--green" style="font-size: 20px;">💡</span>
+                <span class="body--md-regular">建議與支援</span>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

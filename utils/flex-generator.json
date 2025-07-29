@@ -1,0 +1,125 @@
+class FlexMessageService {
+  constructor() {
+    this.templates = {
+      m2: require('./templates/m2_carousel.json'),
+      m3: require('./templates/m3_bubble.json'),
+      m4: require('./templates/m4_carousel.json')
+    };
+  }
+
+  generateM2Message(stageData) {
+    let template = JSON.stringify(this.templates.m2);
+
+    // 根據階段替換變數
+    const stageConfig = {
+      early: {
+        stage_name: '早期階段',
+        header_color: '#1DB446',
+        liff_suffix: 'early-stage'
+      },
+      middle: {
+        stage_name: '中期階段', 
+        header_color: '#FF6B35',
+        liff_suffix: 'middle-stage'
+      },
+      late: {
+        stage_name: '晚期階段',
+        header_color: '#E60012', 
+        liff_suffix: 'late-stage'
+      }
+    };
+
+    const config = stageConfig[stageData.stage];
+    template = template.replace(/{{stage_name}}/g, config.stage_name);
+    template = template.replace(/{{header_color}}/g, config.header_color);
+    template = template.replace(/{{liff_suffix}}/g, config.liff_suffix);
+
+    return JSON.parse(template);
+  }
+
+  generateM3Message(bpsdData) {
+    let template = JSON.stringify(this.templates.m3);
+
+    // BPSD 症狀資料庫
+    const bpsdDatabase = {
+      emotional: {
+        symptom_category: '情緒型症狀',
+        symptom_description: '包含焦慮、憂鬱、易怒等情緒變化',
+        coping_suggestion_1: '提供安心的環境和熟悉的物品',
+        coping_suggestion_2: '使用輕柔的語調和肢體接觸',
+        coping_suggestion_3: '建立規律的日常生活作息',
+        warning_note: '如情緒激動持續超過30分鐘，請考慮尋求專業協助'
+      },
+      behavioral: {
+        symptom_category: '行為型症狀',
+        symptom_description: '包含遊走、重複行為、攻擊性等',
+        coping_suggestion_1: '移除環境中的危險物品',
+        coping_suggestion_2: '轉移注意力到喜愛的活動',
+        coping_suggestion_3: '保持冷靜，避免正面衝突',
+        warning_note: '如出現暴力傾向，請立即確保所有人的安全'
+      },
+      cognitive: {
+        symptom_category: '認知型症狀',
+        symptom_description: '包含幻覺、妄想、記憶混亂等',
+        coping_suggestion_1: '不要直接否定或糾正，順著話題',
+        coping_suggestion_2: '提供現實導向的提示',
+        coping_suggestion_3: '使用熟悉的照片或物品協助記憶',
+        warning_note: '持續的幻覺可能需要藥物調整，請諮詢醫師'
+      }
+    };
+
+    const data = bpsdDatabase[bpsdData.bpsdType];
+    Object.keys(data).forEach(key => {
+      template = template.replace(new RegExp(`{{${key}}}`, 'g'), data[key]);
+    });
+
+    return JSON.parse(template);
+  }
+
+  generateM4Message(careData) {
+    let template = JSON.stringify(this.templates.m4);
+
+    // 照護任務資料庫
+    const careDatabase = {
+      early: {
+        stage_name: '早期階段照護',
+        task_1_title: '認知功能維持',
+        task_1_description: '進行益智遊戲、閱讀、社交活動',
+        task_2_title: '安全環境建立',
+        task_2_description: '移除危險物品、加裝安全設備',
+        task_3_title: '醫療追蹤管理',
+        task_3_description: '定期回診、藥物管理、健康監測',
+        common_challenges: '患者可能對診斷感到否認或沮喪'
+      },
+      middle: {
+        stage_name: '中期階段照護',
+        task_1_title: '日常生活協助',
+        task_1_description: '協助洗澡、穿衣、進食等基本需求',
+        task_2_title: '行為症狀管理',
+        task_2_description: '處理遊走、激動等問題行為',
+        task_3_title: '家庭支援協調',
+        task_3_description: '安排日照服務、居家照護資源',
+        common_challenges: '照護負擔增加，需要更多外部支援'
+      },
+      late: {
+        stage_name: '晚期階段照護',
+        task_1_title: '舒適照護提供',
+        task_1_description: '疼痛管理、舒適體位、皮膚照護',
+        task_2_title: '營養水分維持',
+        task_2_description: '協助進食、預防嗆咳、營養評估',
+        task_3_title: '家屬情緒支持',
+        task_3_description: '提供心理支持、預立醫療決定討論',
+        common_challenges: '面對生命末期照護的身心壓力'
+      }
+    };
+
+    const currentStage = careData.stage || 'early';
+    const data = careDatabase[currentStage];
+
+    Object.keys(data).forEach(key => {
+      template = template.replace(new RegExp(`{{${key}}}`, 'g'), data[key]);
+    });
+
+    return JSON.parse(template);
+  }
+}

@@ -1,0 +1,231 @@
+{
+  "type": "bubble",
+  "size": "mega",
+  "header": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "精神行為症狀 (BPSD)",
+        "weight": "bold",
+        "size": "20px",
+        "color": "#FFFFFF",
+        "align": "center"
+      },
+      {
+        "type": "text",
+        "text": "{{symptom_category}}",
+        "weight": "bold",
+        "size": "18px",
+        "color": "#FFFFFF",
+        "align": "center",
+        "margin": "sm"
+      }
+    ],
+    "backgroundColor": "#6B46C1",
+    "paddingAll": "20px"
+  },
+  "body": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "text",
+        "text": "症狀特徵",
+        "weight": "bold",
+        "size": "18px",
+        "color": "#6B46C1",
+        "margin": "md"
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "text",
+            "text": "{{symptom_description}}",
+            "size": "16px",
+            "color": "#333333",
+            "wrap": true,
+            "margin": "sm"
+          }
+        ],
+        "backgroundColor": "#F8F4FF",
+        "paddingAll": "15px",
+        "cornerRadius": "8px",
+        "margin": "sm"
+      },
+      {
+        "type": "separator",
+        "margin": "xl"
+      },
+      {
+        "type": "text",
+        "text": "應對建議",
+        "weight": "bold",
+        "size": "18px",
+        "color": "#1DB446",
+        "margin": "md"
+      },
+      {
+        "type": "box",
+        "layout": "vertical",
+        "contents": [
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "✓",
+                "size": "16px",
+                "color": "#1DB446",
+                "weight": "bold",
+                "flex": 0
+              },
+              {
+                "type": "text",
+                "text": "{{coping_suggestion_1}}",
+                "size": "16px",
+                "color": "#333333",
+                "wrap": true,
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "sm"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "✓",
+                "size": "16px",
+                "color": "#1DB446",
+                "weight": "bold",
+                "flex": 0
+              },
+              {
+                "type": "text",
+                "text": "{{coping_suggestion_2}}",
+                "size": "16px",
+                "color": "#333333",
+                "wrap": true,
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "sm"
+          },
+          {
+            "type": "box",
+            "layout": "horizontal",
+            "contents": [
+              {
+                "type": "text",
+                "text": "✓",
+                "size": "16px",
+                "color": "#1DB446",
+                "weight": "bold",
+                "flex": 0
+              },
+              {
+                "type": "text",
+                "text": "{{coping_suggestion_3}}",
+                "size": "16px",
+                "color": "#333333",
+                "wrap": true,
+                "flex": 1,
+                "margin": "sm"
+              }
+            ],
+            "margin": "sm"
+          }
+        ],
+        "backgroundColor": "#F0F8F0",
+        "paddingAll": "15px",
+        "cornerRadius": "8px",
+        "margin": "sm"
+      },
+      {
+        "type": "separator",
+        "margin": "xl"
+      },
+      {
+        "type": "text",
+        "text": "⚠️ 注意事項",
+        "weight": "bold",
+        "size": "16px",
+        "color": "#E60012",
+        "margin": "md"
+      },
+      {
+        "type": "text",
+        "text": "{{warning_note}}",
+        "size": "14px",
+        "color": "#666666",
+        "wrap": true,
+        "margin": "sm"
+      }
+    ],
+    "spacing": "sm",
+    "paddingAll": "20px"
+  },
+  "footer": {
+    "type": "box",
+    "layout": "vertical",
+    "contents": [
+      {
+        "type": "button",
+        "style": "primary",
+        "height": "sm",
+        "action": {
+          "type": "uri",
+          "label": "查看詳細指引",
+          "uri": "https://liff.line.me/your-liff-url/bpsd-guide"
+        },
+        "color": "#6B46C1",
+        "margin": "sm"
+      },
+      {
+        "type": "separator",
+        "margin": "md"
+      },
+      {
+        "type": "box",
+        "layout": "horizontal",
+        "contents": [
+          {
+            "type": "button",
+            "style": "secondary",
+            "height": "sm",
+            "action": {
+              "type": "postback",
+              "label": "情緒症狀",
+              "data": "bpsd_category=emotional"
+            },
+            "flex": 1
+          },
+          {
+            "type": "button",
+            "style": "secondary",
+            "height": "sm",
+            "action": {
+              "type": "postback",
+              "label": "行為症狀",
+              "data": "bpsd_category=behavioral"
+            },
+            "flex": 1,
+            "margin": "sm"
+          }
+        ],
+        "margin": "sm"
+      }
+    ],
+    "spacing": "sm",
+    "paddingAll": "20px"
+  }
+}

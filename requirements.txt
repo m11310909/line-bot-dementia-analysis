@@ -4,3 +4,10 @@ pydantic[email]==2.5.0
 aiohttp==3.9.1
 python-multipart==0.0.6
 python-jose[cryptography]==3.3.0
+flask
+line-bot-sdk
+pinecone
+python-dotenv
+pyyaml
+requests
+sift-stack-py

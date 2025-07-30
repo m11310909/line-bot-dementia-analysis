@@ -31,9 +31,9 @@ LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
 
 # 🆕 Updated for RAG API integration
-FLEX_API_URL = os.getenv('FLEX_API_URL', 'http://localhost:8002/m1-flex')  # ← 更新為 8002
-RAG_HEALTH_URL = os.getenv('RAG_HEALTH_URL', 'http://localhost:8002/health')  # ← 新增健康檢查
-RAG_ANALYZE_URL = os.getenv('RAG_ANALYZE_URL', 'http://localhost:8002/api/v1/analyze')  # ← 新增詳細分析
+FLEX_API_URL = os.getenv('FLEX_API_URL', 'http://localhost:8005/comprehensive-analysis')  # ← 更新為正確的端點
+RAG_HEALTH_URL = os.getenv('RAG_HEALTH_URL', 'http://localhost:8005/health')  # ← 新增健康檢查
+RAG_ANALYZE_URL = os.getenv('RAG_ANALYZE_URL', 'http://localhost:8005/comprehensive-analysis')  # ← 更新為正確的端點
 
 # Replit-specific configuration
 REPL_SLUG = os.getenv('REPL_SLUG', 'workspace')

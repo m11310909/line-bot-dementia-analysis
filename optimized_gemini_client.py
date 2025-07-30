@@ -22,7 +22,7 @@ class OptimizedGeminiClient:
     
     def __init__(self, api_key: str = None):
         """初始化優化 Gemini 客戶端"""
-        self.api_key = api_key or os.getenv('AISTUDIO_API_KEY')
+        self.api_key = api_key or os.getenv('GEMINI_API_KEY')
         self.cache_manager = RedisCacheManager()
         
         # 成本優化配置
@@ -54,7 +54,7 @@ class OptimizedGeminiClient:
     
     def _init_gemini(self):
         """初始化 Gemini API"""
-        if not self.api_key:
+        if not self.api_key or self.api_key == 'your_actual_gemini_api_key_here':
             logger.error("❌ 缺少 Gemini API 金鑰")
             self.model = None
             return

@@ -128,7 +128,19 @@ class RedisCacheManager:
         
         try:
             ttl = ttl or self.default_ttl
-            serialized_value = json.dumps(value, ensure_ascii=False)
+            
+            # 處理不可序列化的物件
+            if hasattr(value, '__dict__'):
+                # 如果是物件，轉換為字典
+                serializable_value = value.__dict__
+            elif isinstance(value, (list, dict)):
+                # 如果是列表或字典，檢查是否可序列化
+                serializable_value = value
+            else:
+                # 其他類型轉換為字符串
+                serializable_value = {"value": str(value), "type": type(value).__name__}
+            
+            serialized_value = json.dumps(serializable_value, ensure_ascii=False, default=str)
             return self.redis_client.setex(key, ttl, serialized_value)
         except Exception as e:
             logger.error(f"❌ Redis 寫入錯誤: {e}")

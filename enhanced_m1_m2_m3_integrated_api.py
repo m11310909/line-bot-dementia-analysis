@@ -119,7 +119,11 @@ def handle_message(event):
             
             # 完全安全地提取分析結果
             try:
-                if hasattr(result, 'comprehensive_summary'):
+                if isinstance(result, dict):
+                    # 如果是字典（來自快取），直接提取 comprehensive_summary
+                    summary = result.get('comprehensive_summary', str(result))
+                    logger.info("[DEBUG] 使用 result['comprehensive_summary'] (快取結果)")
+                elif hasattr(result, 'comprehensive_summary'):
                     summary = result.comprehensive_summary
                     logger.info("[DEBUG] 使用 result.comprehensive_summary")
                 elif hasattr(result, '__dict__'):
@@ -139,68 +143,151 @@ def handle_message(event):
             logger.info(f"[DEBUG] 最終摘要: {summary}")
             logger.info("[DEBUG] 開始創建 Flex Message...")
             
-            # 創建符合 LINE Bot API v3 格式的 Flex Message
-            from linebot.v3.messaging.models import (
-                FlexBubble,
-                FlexBox,
-                FlexText,
-                FlexButton,
-                MessageAction,
-                FlexSeparator
-            )
-            
-            # 創建 Flex Message 內容
-            bubble = FlexBubble(
-                size="kilo",
-                header=FlexBox(
-                    layout="vertical",
-                    contents=[
-                        FlexText(
-                            text="🧠 失智症分析結果",
-                            weight="bold",
-                            size="lg",
-                            color="#ffffff"
-                        )
-                    ],
-                    background_color="#005073"
-                ),
-                body=FlexBox(
-                    layout="vertical",
-                    contents=[
-                        FlexText(
-                            text="分析完成",
-                            size="md",
-                            color="#005073",
-                            wrap=True
-                        ),
-                        FlexText(
-                            text=summary,
-                            size="sm",
-                            wrap=True,
-                            margin="md"
-                        )
-                    ]
-                ),
-                footer=FlexBox(
-                    layout="horizontal",
-                    contents=[
-                        FlexButton(
-                            style="primary",
-                            height="sm",
-                            action=MessageAction(
-                                label="更多資訊",
-                                text="請提供更多詳細資訊"
-                            ),
-                            flex=1
-                        )
-                    ]
+            # 使用 XAI Flex Message 生成器創建豐富的視覺模組
+            try:
+                from xai_flex.xai_flex_generator_fixed import XAIFlexGenerator
+                
+                # 初始化 XAI Flex 生成器
+                flex_generator = XAIFlexGenerator()
+                
+                # 準備分析結果數據
+                analysis_chunks = []
+                
+                # 處理不同格式的結果（AnalysisResult 對象或字典）
+                if isinstance(result, dict):
+                    # 快取結果是字典格式
+                    symptom_titles = result.get('symptom_titles', [])
+                    matched_codes = result.get('matched_codes', [])
+                    stage_detection = result.get('stage_detection', {})
+                else:
+                    # 新分析結果是 AnalysisResult 對象
+                    symptom_titles = result.symptom_titles if hasattr(result, 'symptom_titles') else []
+                    matched_codes = result.matched_codes if hasattr(result, 'matched_codes') else []
+                    stage_detection = result.stage_detection if hasattr(result, 'stage_detection') else {}
+                
+                # 添加主要症狀分析
+                if symptom_titles:
+                    for i, title in enumerate(symptom_titles[:2]):
+                        chunk = {
+                            "chunk_id": matched_codes[i] if i < len(matched_codes) else f"analysis-{i}",
+                            "chunk_type": "warning_sign",
+                            "title": title,
+                            "content": summary,
+                            "confidence_score": 0.8,
+                            "tags": ["失智症分析", "症狀識別"]
+                        }
+                        analysis_chunks.append(chunk)
+                
+                # 添加階段分析
+                if stage_detection:
+                    stage_chunk = {
+                        "chunk_id": "stage-analysis",
+                        "chunk_type": "stage_description",
+                        "title": f"{stage_detection.get('detected_stage', '')}階段特徵",
+                        "content": f"評估為{stage_detection.get('detected_stage', '')}階段，建議尋求專業醫療評估。",
+                        "confidence_score": stage_detection.get('confidence', 0.5),
+                        "tags": ["階段分析", "病程評估"]
+                    }
+                    analysis_chunks.append(stage_chunk)
+                
+                # 生成豐富的 Flex Message
+                if analysis_chunks:
+                    flex_response = flex_generator.generate_enhanced_flex_message(analysis_chunks)
+                    flex_message = flex_response
+                    logger.info("[DEBUG] 使用 XAI Flex Message 生成器")
+                else:
+                    # 如果沒有分析結果，創建一個基本的分析 chunk
+                    basic_chunk = {
+                        "chunk_id": "basic-analysis",
+                        "chunk_type": "warning_sign",
+                        "title": "失智症分析結果",
+                        "content": summary,
+                        "confidence_score": 0.7,
+                        "tags": ["基本分析"]
+                    }
+                    flex_response = flex_generator.generate_enhanced_flex_message([basic_chunk])
+                    flex_message = flex_response
+                    logger.info("[DEBUG] 使用基本分析 chunk 生成 XAI Flex Message")
+                    
+            except Exception as flex_error:
+                logger.warning(f"[DEBUG] XAI Flex Message 生成失敗，使用簡單版本: {flex_error}")
+                
+                # 回退到簡單的 Flex Message
+                from linebot.v3.messaging.models import (
+                    FlexBubble,
+                    FlexBox,
+                    FlexText,
+                    FlexButton,
+                    MessageAction,
+                    FlexSeparator
                 )
-            )
-            
-            flex_message = FlexMessage(
-                alt_text="失智症分析結果",
-                contents=bubble
-            )
+                
+                bubble = FlexBubble(
+                    size="kilo",
+                    header=FlexBox(
+                        layout="vertical",
+                        contents=[
+                            FlexText(
+                                text="🧠 失智症分析結果",
+                                weight="bold",
+                                size="lg",
+                                color="#ffffff"
+                            )
+                        ],
+                        background_color="#005073"
+                    ),
+                    body=FlexBox(
+                        layout="vertical",
+                        contents=[
+                            FlexText(
+                                text="分析完成",
+                                size="md",
+                                color="#005073",
+                                wrap=True
+                            ),
+                            FlexText(
+                                text=summary,
+                                size="sm",
+                                wrap=True,
+                                margin="md"
+                            ),
+                            FlexSeparator(margin="md"),
+                            FlexText(
+                                text="💡 建議：",
+                                size="sm",
+                                weight="bold",
+                                color="#005073",
+                                margin="md"
+                            ),
+                            FlexText(
+                                text="• 建議諮詢專業醫療人員\n• 考慮申請長照 2.0 服務\n• 建立安全的生活環境",
+                                size="xs",
+                                color="#666666",
+                                wrap=True,
+                                margin="sm"
+                            )
+                        ]
+                    ),
+                    footer=FlexBox(
+                        layout="horizontal",
+                        contents=[
+                            FlexButton(
+                                style="primary",
+                                height="sm",
+                                action=MessageAction(
+                                    label="更多資訊",
+                                    text="請提供更多詳細資訊"
+                                ),
+                                flex=1
+                            )
+                        ]
+                    )
+                )
+                
+                flex_message = FlexMessage(
+                    alt_text="失智症分析結果",
+                    contents=bubble
+                )
             
             logger.info("[DEBUG] Flex Message 創建完成，準備發送...")
             

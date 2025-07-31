@@ -122,7 +122,8 @@ class M1M2M3IntegratedEngine:
         # 分析 M1 警訊
         m1_chunks = [c for c in retrieved_chunks if c.get("chunk_id", "").startswith("M1")]
         if m1_chunks:
-            best_match = max(m1_chunks, key=lambda x: x.get("similarity_score", 0))
+            # 根據用戶輸入選擇最相關的 M1 片段
+            best_match = self._select_best_m1_chunk(user_input, m1_chunks)
             result.matched_codes.append(best_match["chunk_id"])
             result.symptom_titles.append(best_match["title"])
             result.confidence_levels.append(self._get_confidence_level(best_match.get("similarity_score", 0)))
@@ -168,7 +169,7 @@ class M1M2M3IntegratedEngine:
                 result.modules_used.append("M3")
         
         # 生成綜合摘要和建議
-        result.comprehensive_summary = self._generate_summary(result)
+        result.comprehensive_summary = self._generate_summary(result, user_input)
         result.action_suggestions = self._generate_suggestions(result)
         
         return result
@@ -177,6 +178,20 @@ class M1M2M3IntegratedEngine:
         """檢索相關知識片段"""
         print(f"🔍 檢索查詢: {query}")
         query_words = set(re.findall(r'[\u4e00-\u9fff]+', query))
+        
+        # 根據查詢內容調整檢索策略
+        if any(word in query for word in ["迷路", "方向", "找不到"]):
+            # 方向感問題，優先檢索 M1-02
+            priority_chunk_ids = ["M1-02"]
+        elif any(word in query for word in ["重複", "同樣", "一樣", "反覆"]):
+            # 重複行為，優先檢索 M1-01
+            priority_chunk_ids = ["M1-01"]
+        elif any(word in query for word in ["語言", "說話", "表達", "詞彙"]):
+            # 語言問題，優先檢索 M1-03
+            priority_chunk_ids = ["M1-03"]
+        else:
+            # 默認策略
+            priority_chunk_ids = []
         
         scored_chunks = []
         for chunk in self.chunks:
@@ -196,6 +211,10 @@ class M1M2M3IntegratedEngine:
                 keyword_bonus = len(query_words & chunk_keywords) * 0.3
                 similarity += keyword_bonus
                 
+                # 優先級加權
+                if chunk.get("chunk_id") in priority_chunk_ids:
+                    similarity += 0.5  # 大幅提升優先級
+                
                 chunk_copy = chunk.copy()
                 chunk_copy["similarity_score"] = round(similarity, 4)
                 scored_chunks.append(chunk_copy)
@@ -205,6 +224,30 @@ class M1M2M3IntegratedEngine:
         
         print(f"📊 找到 {len(top_chunks)} 個相關片段")
         return top_chunks
+    
+    def _select_best_m1_chunk(self, user_input: str, m1_chunks: List[Dict]) -> Dict:
+        """根據用戶輸入選擇最相關的 M1 片段"""
+        user_lower = user_input.lower()
+        
+        # 根據關鍵詞匹配選擇最相關的片段
+        if any(word in user_lower for word in ["迷路", "方向", "找不到", "熟悉"]):
+            # 方向感問題 -> M1-02
+            for chunk in m1_chunks:
+                if chunk.get("chunk_id") == "M1-02":
+                    return chunk
+        elif any(word in user_lower for word in ["重複", "同樣", "一樣", "反覆", "總是"]):
+            # 重複行為 -> M1-01
+            for chunk in m1_chunks:
+                if chunk.get("chunk_id") == "M1-01":
+                    return chunk
+        elif any(word in user_lower for word in ["語言", "說話", "表達", "詞彙", "用詞"]):
+            # 語言問題 -> M1-03
+            for chunk in m1_chunks:
+                if chunk.get("chunk_id") == "M1-03":
+                    return chunk
+        
+        # 如果沒有明確匹配，選擇相似度最高的
+        return max(m1_chunks, key=lambda x: x.get("similarity_score", 0))
     
     def _get_confidence_level(self, score: float) -> str:
         """轉換數值為信心度等級"""
@@ -247,23 +290,60 @@ class M1M2M3IntegratedEngine:
         
         return {"severity": "未確定", "scores": severity_scores, "confidence": 0}
     
-    def _generate_summary(self, result: AnalysisResult) -> str:
+    def _generate_summary(self, result: AnalysisResult, user_input: str = "") -> str:
         """生成綜合分析摘要"""
         summary_parts = []
         
-        if "M1" in result.modules_used:
-            summary_parts.append("檢測到失智症警訊")
-        if "M2" in result.modules_used:
-            stage = result.stage_detection.get("detected_stage", "")
-            summary_parts.append(f"評估為{stage}階段")
-        if "M3" in result.modules_used:
-            bpsd_count = len(result.bpsd_analysis.get("detected_categories", []))
-            summary_parts.append(f"發現{bpsd_count}種行為心理症狀")
+        # 根據具體症狀和用戶輸入生成摘要
+        if result.symptom_titles:
+            # 提取主要症狀
+            main_symptoms = []
+            for title in result.symptom_titles[:2]:  # 最多取前2個症狀
+                # 根據用戶輸入和症狀標題判斷具體症狀
+                if "記憶力減退" in title:
+                    if any(word in user_input for word in ["重複", "同樣", "一樣", "反覆", "總是"]):
+                        main_symptoms.append("重複行為")
+                    else:
+                        main_symptoms.append("記憶力減退")
+                elif "無法勝任" in title or "熟悉" in title:
+                    main_symptoms.append("方向感問題")
+                elif "語言表達" in title or "表達" in title:
+                    main_symptoms.append("語言表達困難")
+                elif "重複" in title or "反覆" in title:
+                    main_symptoms.append("重複行為")
+                else:
+                    main_symptoms.append(title.split("：")[0] if "：" in title else title)
+            
+            if main_symptoms:
+                summary_parts.append(f"觀察到{', '.join(main_symptoms)}等症狀")
         
+        # 階段評估
+        if "M2" in result.modules_used and result.stage_detection:
+            stage = result.stage_detection.get("detected_stage", "")
+            if stage:
+                summary_parts.append(f"評估為{stage}階段")
+        
+        # BPSD 症狀
+        if "M3" in result.modules_used and result.bpsd_analysis:
+            bpsd_count = len(result.bpsd_analysis.get("detected_categories", []))
+            if bpsd_count > 0:
+                summary_parts.append(f"發現{bpsd_count}種行為心理症狀")
+        
+        # 生成最終摘要
         if summary_parts:
-            return "；".join(summary_parts) + "。建議尋求專業醫療評估。"
+            summary = "；".join(summary_parts) + "。"
+            
+            # 根據症狀嚴重程度添加建議
+            if any("重度" in part for part in summary_parts):
+                summary += "建議立即尋求專業醫療評估。"
+            elif any("中度" in part for part in summary_parts):
+                summary += "建議盡快諮詢醫療專業人員。"
+            else:
+                summary += "建議尋求專業醫療評估。"
         else:
-            return "建議持續觀察並適時諮詢醫療專業人員。"
+            summary = "建議持續觀察並適時諮詢醫療專業人員。"
+        
+        return summary
     
     def _generate_suggestions(self, result: AnalysisResult) -> List[str]:
         """生成行動建議"""

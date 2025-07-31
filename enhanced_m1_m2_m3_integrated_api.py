@@ -94,7 +94,27 @@ def handle_message(event):
         
         if integrated_engine:
             logger.info("[DEBUG] integrated_engine 可用，開始分析...")
-            result = integrated_engine.analyze_comprehensive(user_input)
+            
+            # 檢查快取
+            cached_result = None
+            if cache_manager:
+                cached_result = cache_manager.get_cached_analysis(user_input)
+                if cached_result:
+                    logger.info("[DEBUG] 快取命中，使用快取結果")
+                    result = cached_result
+                else:
+                    logger.info("[DEBUG] 快取未命中，進行新分析")
+                    result = integrated_engine.analyze_comprehensive(user_input)
+                    # 快取新結果
+                    try:
+                        cache_manager.cache_analysis_result(user_input, result)
+                        logger.info("[DEBUG] 新分析結果已快取")
+                    except Exception as cache_error:
+                        logger.warning(f"[DEBUG] 快取失敗: {cache_error}")
+            else:
+                logger.info("[DEBUG] 無快取管理器，直接分析")
+                result = integrated_engine.analyze_comprehensive(user_input)
+            
             logger.info(f"[DEBUG] 分析結果類型: {type(result)}")
             
             # 完全安全地提取分析結果

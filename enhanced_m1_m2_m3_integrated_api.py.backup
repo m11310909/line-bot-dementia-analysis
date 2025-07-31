@@ -6,7 +6,6 @@
 
 import os
 import logging
-from datetime import datetime
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from pydantic import BaseModel
@@ -120,51 +119,55 @@ def handle_message(event):
             logger.info("[DEBUG] 開始創建 Flex Message...")
             
             # 創建符合 LINE Bot API v3 格式的 Flex Message
-            from linebot.v3.messaging.models import (
-                FlexBubble,
-                FlexBox,
-                FlexText,
-                FlexButton,
-                MessageAction,
-                FlexSeparator
-            )
+            from linebot.models import (
+    FlexSendMessage,
+    BubbleContainer,
+    BoxComponent,
+    TextComponent,
+    ButtonComponent,
+    MessageAction,
+    SeparatorComponent,
+    SpacerComponent
+)
             
             # 創建 Flex Message 內容
-            bubble = FlexBubble(
+            bubble = BubbleContainer(
                 size="kilo",
-                header=FlexBox(
+                header=BoxComponent(
                     layout="vertical",
                     contents=[
-                        FlexText(
+                        TextComponent(
                             text="🧠 失智症分析結果",
                             weight="bold",
                             size="lg",
                             color="#ffffff"
                         )
                     ],
-                    background_color="#005073"
+                    background_color="#005073",
+                    padding_all="15dp"
                 ),
-                body=FlexBox(
+                body=BoxComponent(
                     layout="vertical",
                     contents=[
-                        FlexText(
+                        TextComponent(
                             text="分析完成",
                             size="md",
                             color="#005073",
                             wrap=True
                         ),
-                        FlexText(
+                        TextComponent(
                             text=summary,
                             size="sm",
                             wrap=True,
                             margin="md"
                         )
-                    ]
+                    ],
+                    padding_all="15dp"
                 ),
-                footer=FlexBox(
+                footer=BoxComponent(
                     layout="horizontal",
                     contents=[
-                        FlexButton(
+                        ButtonComponent(
                             style="primary",
                             height="sm",
                             action=MessageAction(
@@ -173,11 +176,12 @@ def handle_message(event):
                             ),
                             flex=1
                         )
-                    ]
+                    ],
+                    padding_all="15dp"
                 )
             )
             
-            flex_message = FlexMessage(
+            flex_message = FlexSendMessage(
                 alt_text="失智症分析結果",
                 contents=bubble
             )
@@ -187,11 +191,6 @@ def handle_message(event):
             # 檢查 reply token
             if not event.reply_token:
                 logger.error("[DEBUG] Reply token 為空")
-                return
-            
-            # 檢查 reply token 是否為 "00000000000000000000000000000000"
-            if event.reply_token == "00000000000000000000000000000000":
-                logger.error("[DEBUG] Reply token 無效")
                 return
             
             # 回覆 Flex Message（加入超時處理）

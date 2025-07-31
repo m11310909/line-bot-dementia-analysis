@@ -100,29 +100,76 @@ def create_smart_flex_message(user_input: str, analysis_result: Any) -> Dict:
     # 根據用戶輸入選擇適合的視覺模組
     user_input_lower = user_input.lower()
     
-    # 分析用戶意圖
-    if any(word in user_input_lower for word in ['記憶', '忘記', '重複']):
+    # 分析用戶意圖 - 更精確的關鍵字判斷
+    if any(word in user_input_lower for word in ['記憶', '忘記', '重複', '記不住', '記性']):
         component_type = "warning_sign"
         title = "記憶力警訊分析"
         color_theme = "warning"
-    elif any(word in user_input_lower for word in ['階段', '程度', '嚴重']):
+        logger.info(f"[DEBUG] 選擇模組：記憶力警訊分析 (關鍵字: {[word for word in ['記憶', '忘記', '重複', '記不住', '記性'] if word in user_input_lower]})")
+    elif any(word in user_input_lower for word in ['階段', '程度', '嚴重', '輕度', '中度', '重度']):
         component_type = "stage_description"
         title = "病程階段評估"
         color_theme = "info"
-    elif any(word in user_input_lower for word in ['行為', '情緒', '心理']):
+        logger.info(f"[DEBUG] 選擇模組：病程階段評估 (關鍵字: {[word for word in ['階段', '程度', '嚴重', '輕度', '中度', '重度'] if word in user_input_lower]})")
+    elif any(word in user_input_lower for word in ['行為', '情緒', '心理', '暴躁', '幻覺', '妄想', '焦慮', '憂鬱', '吵鬧']):
         component_type = "bpsd_symptom"
         title = "行為心理症狀分析"
         color_theme = "neutral"
-    elif any(word in user_input_lower for word in ['照護', '照顧', '建議']):
+        logger.info(f"[DEBUG] 選擇模組：行為心理症狀分析 (關鍵字: {[word for word in ['行為', '情緒', '心理', '暴躁', '幻覺', '妄想', '焦慮', '憂鬱', '吵鬧'] if word in user_input_lower]})")
+    elif any(word in user_input_lower for word in ['照護', '照顧', '建議', '家屬', '護理', '注意']):
         component_type = "coping_strategy"
         title = "照護建議"
         color_theme = "success"
+        logger.info(f"[DEBUG] 選擇模組：照護建議 (關鍵字: {[word for word in ['照護', '照顧', '建議', '家屬', '護理', '注意'] if word in user_input_lower]})")
+    elif any(word in user_input_lower for word in ['不會用', '做家事', '生活能力', '洗衣機', '手機', '煮飯', '洗澡']):
+        component_type = "daily_activity"
+        title = "日常生活能力評估"
+        color_theme = "info"
+        logger.info(f"[DEBUG] 選擇模組：日常生活能力評估 (關鍵字: {[word for word in ['不會用', '做家事', '生活能力', '洗衣機', '手機', '煮飯', '洗澡'] if word in user_input_lower]})")
     else:
-        component_type = "warning_sign"
+        component_type = "comprehensive"
         title = "失智症綜合分析"
         color_theme = "info"
+        logger.info(f"[DEBUG] 選擇模組：失智症綜合分析 (預設)")
     
-    # 創建適合的 Flex Message
+    # 根據模組類型產生不同的 body 內容
+    if component_type == "warning_sign":
+        body_contents = [
+            {"type": "text", "text": "⚠️ 記憶力警訊：近期有明顯忘記事情、重複提問等現象，建議及早就醫評估。", "weight": "bold", "size": "md", "color": "#d9534f", "wrap": True},
+            {"type": "separator", "margin": "md"},
+            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+        ]
+    elif component_type == "daily_activity":
+        body_contents = [
+            {"type": "text", "text": "🧩 日常生活能力：近期在家事、使用家電、生活自理上出現困難，建議家屬多協助。", "weight": "bold", "size": "md", "color": "#0275d8", "wrap": True},
+            {"type": "separator", "margin": "md"},
+            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+        ]
+    elif component_type == "bpsd_symptom":
+        body_contents = [
+            {"type": "text", "text": "🧠 行為心理症狀：近期有暴躁、幻覺、妄想、情緒不穩等現象，建議尋求專業協助。", "weight": "bold", "size": "md", "color": "#f0ad4e", "wrap": True},
+            {"type": "separator", "margin": "md"},
+            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+        ]
+    elif component_type == "coping_strategy":
+        body_contents = [
+            {"type": "text", "text": "💡 照護建議：保持耐心、建立規律作息、善用輔助工具，並多與醫療團隊溝通。", "weight": "bold", "size": "md", "color": "#5cb85c", "wrap": True},
+            {"type": "separator", "margin": "md"},
+            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+        ]
+    elif component_type == "stage_description":
+        body_contents = [
+            {"type": "text", "text": "📊 病程階段評估：根據描述，可能處於失智症的某個階段，建議諮詢專業醫師。", "weight": "bold", "size": "md", "color": "#5bc0de", "wrap": True},
+            {"type": "separator", "margin": "md"},
+            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+        ]
+    else:
+        body_contents = [
+            {"type": "text", "text": "🧠 綜合分析：感謝您的提問，以下為綜合分析結果。", "weight": "bold", "size": "md", "color": "#005073", "wrap": True},
+            {"type": "separator", "margin": "md"},
+            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+        ]
+
     flex_message = {
         "type": "flex",
         "altText": f"失智症分析：{title}",
@@ -147,42 +194,7 @@ def create_smart_flex_message(user_input: str, analysis_result: Any) -> Dict:
             "body": {
                 "type": "box",
                 "layout": "vertical",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": summary,
-                        "weight": "bold",
-                        "size": "md",
-                        "color": "#005073",
-                        "wrap": True
-                    },
-                    {
-                        "type": "separator",
-                        "margin": "md"
-                    },
-                    {
-                        "type": "box",
-                        "layout": "vertical",
-                        "margin": "md",
-                        "contents": [
-                            {
-                                "type": "text",
-                                "text": "📝 用戶描述",
-                                "size": "sm",
-                                "weight": "bold",
-                                "color": "#666666"
-                            },
-                            {
-                                "type": "text",
-                                "text": user_input,
-                                "size": "sm",
-                                "weight": "regular",
-                                "wrap": True,
-                                "margin": "xs"
-                            }
-                        ]
-                    }
-                ]
+                "contents": body_contents
             },
             "footer": {
                 "type": "box",

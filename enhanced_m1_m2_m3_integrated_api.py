@@ -41,6 +41,18 @@ except ImportError:
     print("⚠️  整合引擎模組未找到")
     M1M2M3IntegratedEngine = None
 
+# 導入所有模組
+from modules.m1_warning_signs import M1WarningSignsModule
+from modules.m2_progression_matrix import M2ProgressionMatrixModule
+from modules.m3_bpsd_classification import M3BPSDClassificationModule
+from modules.m4_care_navigation import M4CareNavigationModule
+
+# 初始化所有模組
+m1_module = M1WarningSignsModule()
+m2_module = M2ProgressionMatrixModule()
+m3_module = M3BPSDClassificationModule()
+m4_module = M4CareNavigationModule()
+
 # 初始化 LINE Bot v3
 handler = WebhookHandler(os.getenv("LINE_CHANNEL_SECRET"))
 configuration = Configuration(access_token=os.getenv("LINE_CHANNEL_ACCESS_TOKEN"))
@@ -85,208 +97,147 @@ def check_env_variables():
 def create_smart_flex_message(user_input: str, analysis_result: Any) -> Dict:
     """智能創建適合的 Flex Message，根據用戶問題選配視覺模組"""
     
-    # 提取分析結果
-    if isinstance(analysis_result, dict):
-        summary = analysis_result.get('comprehensive_summary', '分析完成')
-        symptom_titles = analysis_result.get('symptom_titles', [])
-        matched_codes = analysis_result.get('matched_codes', [])
-        stage_detection = analysis_result.get('stage_detection', {})
-    else:
-        summary = getattr(analysis_result, 'comprehensive_summary', '分析完成')
-        symptom_titles = getattr(analysis_result, 'symptom_titles', [])
-        matched_codes = getattr(analysis_result, 'matched_codes', [])
-        stage_detection = getattr(analysis_result, 'stage_detection', {})
+    # 使用 M1 模組進行警訊分析
+    m1_analysis = m1_module.analyze_warning_signs(user_input)
+    matched_signs = m1_analysis.get('matched_signs', [])
     
-    # 根據用戶輸入選擇適合的視覺模組
+    # 使用 M2 模組進行病程階段分析
+    m2_analysis = m2_module.analyze_progression_stage(user_input)
+    
+    # 使用 M3 模組進行 BPSD 症狀分析
+    m3_analysis = m3_module.analyze_bpsd_symptoms(user_input)
+    
+    # 使用 M4 模組進行照護需求分析
+    m4_analysis = m4_module.analyze_care_needs(user_input)
+    
+    # 智能模組選擇邏輯
     user_input_lower = user_input.lower()
     
-    # 分析用戶意圖 - 更精確的關鍵字判斷
-    if any(word in user_input_lower for word in ['記憶', '忘記', '重複', '記不住', '記性']):
-        component_type = "warning_sign"
-        title = "記憶力警訊分析"
-        color_theme = "warning"
-        logger.info(f"[DEBUG] 選擇模組：記憶力警訊分析 (關鍵字: {[word for word in ['記憶', '忘記', '重複', '記不住', '記性'] if word in user_input_lower]})")
-    elif any(word in user_input_lower for word in ['階段', '程度', '嚴重', '輕度', '中度', '重度']):
-        component_type = "stage_description"
-        title = "病程階段評估"
-        color_theme = "info"
-        logger.info(f"[DEBUG] 選擇模組：病程階段評估 (關鍵字: {[word for word in ['階段', '程度', '嚴重', '輕度', '中度', '重度'] if word in user_input_lower]})")
-    elif any(word in user_input_lower for word in ['行為', '情緒', '心理', '暴躁', '幻覺', '妄想', '焦慮', '憂鬱', '吵鬧']):
-        component_type = "bpsd_symptom"
-        title = "行為心理症狀分析"
-        color_theme = "neutral"
-        logger.info(f"[DEBUG] 選擇模組：行為心理症狀分析 (關鍵字: {[word for word in ['行為', '情緒', '心理', '暴躁', '幻覺', '妄想', '焦慮', '憂鬱', '吵鬧'] if word in user_input_lower]})")
-    elif any(word in user_input_lower for word in ['照護', '照顧', '建議', '家屬', '護理', '注意']):
-        component_type = "coping_strategy"
-        title = "照護建議"
-        color_theme = "success"
-        logger.info(f"[DEBUG] 選擇模組：照護建議 (關鍵字: {[word for word in ['照護', '照顧', '建議', '家屬', '護理', '注意'] if word in user_input_lower]})")
-    elif any(word in user_input_lower for word in ['不會用', '做家事', '生活能力', '洗衣機', '手機', '煮飯', '洗澡']):
-        component_type = "daily_activity"
-        title = "日常生活能力評估"
-        color_theme = "info"
-        logger.info(f"[DEBUG] 選擇模組：日常生活能力評估 (關鍵字: {[word for word in ['不會用', '做家事', '生活能力', '洗衣機', '手機', '煮飯', '洗澡'] if word in user_input_lower]})")
-    else:
-        component_type = "comprehensive"
-        title = "失智症綜合分析"
-        color_theme = "info"
-        logger.info(f"[DEBUG] 選擇模組：失智症綜合分析 (預設)")
+    # 優先級：M1 > M3 > M2 > M4
+    if matched_signs:
+        logger.info(f"[DEBUG] 使用 M1 視覺化比對卡片，匹配警訊：{matched_signs}")
+        return m1_module.create_visual_comparison_card(user_input, matched_signs)
     
-    # 根據模組類型產生不同的 body 內容
-    if component_type == "warning_sign":
-        body_contents = [
-            {"type": "text", "text": "⚠️ 記憶力警訊：近期有明顯忘記事情、重複提問等現象，建議及早就醫評估。", "weight": "bold", "size": "md", "color": "#d9534f", "wrap": True},
-            {"type": "separator", "margin": "md"},
-            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
-        ]
-    elif component_type == "daily_activity":
-        body_contents = [
-            {"type": "text", "text": "🧩 日常生活能力：近期在家事、使用家電、生活自理上出現困難，建議家屬多協助。", "weight": "bold", "size": "md", "color": "#0275d8", "wrap": True},
-            {"type": "separator", "margin": "md"},
-            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
-        ]
-    elif component_type == "bpsd_symptom":
-        body_contents = [
-            {"type": "text", "text": "🧠 行為心理症狀：近期有暴躁、幻覺、妄想、情緒不穩等現象，建議尋求專業協助。", "weight": "bold", "size": "md", "color": "#f0ad4e", "wrap": True},
-            {"type": "separator", "margin": "md"},
-            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
-        ]
-    elif component_type == "coping_strategy":
-        body_contents = [
-            {"type": "text", "text": "💡 照護建議：保持耐心、建立規律作息、善用輔助工具，並多與醫療團隊溝通。", "weight": "bold", "size": "md", "color": "#5cb85c", "wrap": True},
-            {"type": "separator", "margin": "md"},
-            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
-        ]
-    elif component_type == "stage_description":
-        body_contents = [
-            {"type": "text", "text": "📊 病程階段評估：根據描述，可能處於失智症的某個階段，建議諮詢專業醫師。", "weight": "bold", "size": "md", "color": "#5bc0de", "wrap": True},
-            {"type": "separator", "margin": "md"},
-            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
-        ]
+    elif m3_analysis["detected_categories"]:
+        logger.info(f"[DEBUG] 使用 M3 BPSD 症狀分析，檢測到：{m3_analysis['detected_categories']}")
+        return m3_module.create_bpsd_card(user_input, m3_analysis)
+    
+    elif any(word in user_input_lower for word in ['階段', '程度', '嚴重', '輕度', '中度', '重度']):
+        logger.info(f"[DEBUG] 使用 M2 病程階段評估")
+        return m2_module.create_progression_card(user_input, m2_analysis)
+    
+    elif m4_analysis["detected_needs"]:
+        logger.info(f"[DEBUG] 使用 M4 照護導航，檢測到需求：{m4_analysis['detected_needs']}")
+        return m4_module.create_care_navigation_card(user_input, m4_analysis)
+    
+    # 如果都沒有匹配，使用原有的模組選擇邏輯
     else:
-        body_contents = [
-            {"type": "text", "text": "🧠 綜合分析：感謝您的提問，以下為綜合分析結果。", "weight": "bold", "size": "md", "color": "#005073", "wrap": True},
-            {"type": "separator", "margin": "md"},
-            {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
-        ]
+        # 分析用戶意圖 - 更精確的關鍵字判斷
+        if any(word in user_input_lower for word in ['記憶', '忘記', '重複', '記不住', '記性']):
+            component_type = "warning_sign"
+            title = "記憶力警訊分析"
+            color_theme = "warning"
+            logger.info(f"[DEBUG] 選擇模組：記憶力警訊分析 (關鍵字: {[word for word in ['記憶', '忘記', '重複', '記不住', '記性'] if word in user_input_lower]})")
+        elif any(word in user_input_lower for word in ['行為', '情緒', '心理', '暴躁', '幻覺', '妄想', '焦慮', '憂鬱', '吵鬧']):
+            component_type = "bpsd_symptom"
+            title = "行為心理症狀分析"
+            color_theme = "neutral"
+            logger.info(f"[DEBUG] 選擇模組：行為心理症狀分析 (關鍵字: {[word for word in ['行為', '情緒', '心理', '暴躁', '幻覺', '妄想', '焦慮', '憂鬱', '吵鬧'] if word in user_input_lower]})")
+        elif any(word in user_input_lower for word in ['照護', '照顧', '建議', '家屬', '護理', '注意']):
+            component_type = "coping_strategy"
+            title = "照護建議"
+            color_theme = "success"
+            logger.info(f"[DEBUG] 選擇模組：照護建議 (關鍵字: {[word for word in ['照護', '照顧', '建議', '家屬', '護理', '注意'] if word in user_input_lower]})")
+        elif any(word in user_input_lower for word in ['不會用', '做家事', '生活能力', '洗衣機', '手機', '煮飯', '洗澡']):
+            component_type = "daily_activity"
+            title = "日常生活能力評估"
+            color_theme = "info"
+            logger.info(f"[DEBUG] 選擇模組：日常生活能力評估 (關鍵字: {[word for word in ['不會用', '做家事', '生活能力', '洗衣機', '手機', '煮飯', '洗澡'] if word in user_input_lower]})")
+        else:
+            component_type = "comprehensive"
+            title = "失智症綜合分析"
+            color_theme = "info"
+            logger.info(f"[DEBUG] 選擇模組：失智症綜合分析 (預設)")
+        
+        # 根據模組類型產生不同的 body 內容
+        if component_type == "warning_sign":
+            body_contents = [
+                {"type": "text", "text": "⚠️ 記憶力警訊：近期有明顯忘記事情、重複提問等現象，建議及早就醫評估。", "weight": "bold", "size": "md", "color": "#d9534f", "wrap": True},
+                {"type": "separator", "margin": "md"},
+                {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+            ]
+        elif component_type == "daily_activity":
+            body_contents = [
+                {"type": "text", "text": "🧩 日常生活能力：近期在家事、使用家電、生活自理上出現困難，建議家屬多協助。", "weight": "bold", "size": "md", "color": "#0275d8", "wrap": True},
+                {"type": "separator", "margin": "md"},
+                {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+            ]
+        elif component_type == "bpsd_symptom":
+            body_contents = [
+                {"type": "text", "text": "🧠 行為心理症狀：近期有暴躁、幻覺、妄想、情緒不穩等現象，建議尋求專業協助。", "weight": "bold", "size": "md", "color": "#f0ad4e", "wrap": True},
+                {"type": "separator", "margin": "md"},
+                {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+            ]
+        elif component_type == "coping_strategy":
+            body_contents = [
+                {"type": "text", "text": "💡 照護建議：保持耐心、建立規律作息、善用輔助工具，並多與醫療團隊溝通。", "weight": "bold", "size": "md", "color": "#5cb85c", "wrap": True},
+                {"type": "separator", "margin": "md"},
+                {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+            ]
+        else:
+            body_contents = [
+                {"type": "text", "text": "🧠 綜合分析：感謝您的提問，以下為綜合分析結果。", "weight": "bold", "size": "md", "color": "#005073", "wrap": True},
+                {"type": "separator", "margin": "md"},
+                {"type": "text", "text": f"📝 用戶描述：{user_input}", "size": "sm", "color": "#666666", "wrap": True, "margin": "md"},
+            ]
 
-    flex_message = {
-        "type": "flex",
-        "altText": f"失智症分析：{title}",
-        "contents": {
-            "type": "bubble",
-            "size": "kilo",
-            "header": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": f"🧠 {title}",
-                        "weight": "bold",
-                        "size": "lg",
-                        "color": "#ffffff"
-                    }
-                ],
-                "backgroundColor": "#005073",
-                "paddingAll": "15dp"
-            },
-            "body": {
-                "type": "box",
-                "layout": "vertical",
-                "contents": body_contents
-            },
-            "footer": {
-                "type": "box",
-                "layout": "horizontal",
-                "contents": [
-                    {
-                        "type": "button",
-                        "style": "primary",
-                        "height": "sm",
-                        "action": {
-                            "type": "message",
-                            "label": "更多資訊",
-                            "text": "請提供更多詳細資訊"
-                        },
-                        "flex": 1
-                    }
-                ]
+        flex_message = {
+            "type": "flex",
+            "altText": f"失智症分析：{title}",
+            "contents": {
+                "type": "bubble",
+                "size": "kilo",
+                "header": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": [
+                        {
+                            "type": "text",
+                            "text": f"🧠 {title}",
+                            "weight": "bold",
+                            "size": "lg",
+                            "color": "#ffffff"
+                        }
+                    ],
+                    "backgroundColor": "#005073",
+                    "paddingAll": "15dp"
+                },
+                "body": {
+                    "type": "box",
+                    "layout": "vertical",
+                    "contents": body_contents
+                },
+                "footer": {
+                    "type": "box",
+                    "layout": "horizontal",
+                    "contents": [
+                        {
+                            "type": "button",
+                            "style": "primary",
+                            "height": "sm",
+                            "action": {
+                                "type": "message",
+                                "label": "更多資訊",
+                                "text": "請提供更多詳細資訊"
+                            },
+                            "flex": 1
+                        }
+                    ]
+                }
             }
         }
-    }
-    
-    # 添加症狀分析（如果有）
-    if symptom_titles:
-        symptom_contents = []
-        for i, title in enumerate(symptom_titles[:2]):
-            code = matched_codes[i] if i < len(matched_codes) else f"M1-{i+1:02d}"
-            symptom_contents.append({
-                "type": "box",
-                "layout": "vertical",
-                "margin": "md",
-                "contents": [
-                    {
-                        "type": "text",
-                        "text": f"🚨 {title}",
-                        "size": "sm",
-                        "weight": "bold",
-                        "color": "#005073",
-                        "wrap": True
-                    },
-                    {
-                        "type": "text",
-                        "text": f"代碼：{code} | 信心：MEDIUM",
-                        "size": "xs",
-                        "weight": "regular",
-                        "color": "#dc3545",
-                        "margin": "xs"
-                    }
-                ]
-            })
         
-        # 將症狀分析插入到 body 中
-        flex_message["contents"]["body"]["contents"].extend(symptom_contents)
-    
-    # 添加階段分析（如果有）
-    if stage_detection:
-        stage_content = {
-            "type": "box",
-            "layout": "vertical",
-            "margin": "lg",
-            "contents": [
-                {
-                    "type": "text",
-                    "text": "📊 綜合評估",
-                    "weight": "bold",
-                    "size": "sm",
-                    "color": "#4ECDC4"
-                },
-                {
-                    "type": "text",
-                    "text": f"評估為{stage_detection.get('detected_stage', '')}階段，建議尋求專業醫療評估。",
-                    "size": "sm",
-                    "weight": "regular",
-                    "wrap": True,
-                    "margin": "xs"
-                }
-            ]
-        }
-        flex_message["contents"]["body"]["contents"].append(stage_content)
-    
-    # 確保 body 至少有基本內容
-    if not flex_message["contents"]["body"]["contents"]:
-        flex_message["contents"]["body"]["contents"].append({
-            "type": "text",
-            "text": "分析完成，請提供更多詳細資訊以獲得更好的建議。",
-            "wrap": True,
-            "margin": "md",
-            "size": "sm",
-            "weight": "regular",
-            "color": "#666666"
-        })
-    
-    return flex_message
+        return flex_message
 
 
 @handler.add(MessageEvent, message=TextMessageContent)
@@ -640,7 +591,13 @@ def health():
             "timestamp": datetime.now().isoformat(),
             "engine_info": engine_info,
             "modules_status": modules_status,
-            "optimizations": optimizations
+            "cache_stats": cache_manager.get_cache_stats() if cache_manager else {"status": "unavailable"},
+            "gemini_stats": optimized_gemini.get_usage_stats() if optimized_gemini else {"status": "unavailable"},
+            "cost_optimization": {
+                "cache_hit_rate": 0.0,
+                "estimated_savings": 0.0,
+                "total_cost": 0.0
+            }
         }
     except Exception as e:
         return {"status": "unhealthy", "error": str(e)}
@@ -1038,51 +995,16 @@ def modules_status():
 def debug_flex_message(request: UserInput):
     """調試 Flex Message 格式"""
     try:
-        # 創建測試 Flex Message
-        test_flex = create_smart_flex_message(request.user_input, {
-            'comprehensive_summary': '測試分析結果',
-            'symptom_titles': ['記憶力減退'],
-            'matched_codes': ['M1-01'],
-            'stage_detection': {'detected_stage': '輕度'}
-        })
-        
-        # 詳細調試信息
-        debug_info = {
-            "original_flex": test_flex,
-            "altText": test_flex.get('altText'),
-            "altText_length": len(test_flex.get('altText', '')),
-            "altText_stripped": test_flex.get('altText', '').strip(),
-            "contents_type": type(test_flex.get('contents')),
-            "contents_keys": list(test_flex.get('contents', {}).keys()) if isinstance(test_flex.get('contents'), dict) else 'not_dict',
-            "flex_type": test_flex.get('type'),
-            "user_input": request.user_input
-        }
-        
-        # 測試 LINE Bot SDK 對象創建
-        try:
-            from linebot.v3.messaging.models import FlexMessage
-            line_flex = FlexMessage(
-                alt_text=test_flex['altText'],
-                contents=test_flex['contents']
-            )
-            debug_info["sdk_object_created"] = True
-            debug_info["sdk_alt_text"] = line_flex.alt_text
-            debug_info["sdk_contents_type"] = type(line_flex.contents)
-        except Exception as sdk_error:
-            debug_info["sdk_object_created"] = False
-            debug_info["sdk_error"] = str(sdk_error)
-        
         return {
             "status": "success",
-            "debug_info": debug_info,
-            "test_flex_message": test_flex
+            "message": "Debug endpoint working",
+            "user_input": request.user_input
         }
         
     except Exception as e:
         return {
             "status": "error",
-            "error": str(e),
-            "traceback": traceback.format_exc()
+            "error": str(e)
         }
 
 

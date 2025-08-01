@@ -31,15 +31,9 @@ LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
 
 # 🆕 Updated for RAG API integration
-<<<<<<< Updated upstream
-FLEX_API_URL = os.getenv('FLEX_API_URL', 'http://localhost:8005/comprehensive-analysis')  # ← 更新為正確的端點
-RAG_HEALTH_URL = os.getenv('RAG_HEALTH_URL', 'http://localhost:8005/health')  # ← 新增健康檢查
-RAG_ANALYZE_URL = os.getenv('RAG_ANALYZE_URL', 'http://localhost:8005/comprehensive-analysis')  # ← 更新為正確的端點
-=======
 FLEX_API_URL = os.getenv('FLEX_API_URL', 'http://localhost:8000/demo/message')  # ← 更新為 8000
 RAG_HEALTH_URL = os.getenv('RAG_HEALTH_URL', 'http://localhost:8000/health')  # ← 新增健康檢查
 RAG_ANALYZE_URL = os.getenv('RAG_ANALYZE_URL', 'http://localhost:8000/demo/comprehensive')  # ← 新增詳細分析
->>>>>>> Stashed changes
 
 # Replit-specific configuration
 REPL_SLUG = os.getenv('REPL_SLUG', 'workspace')
@@ -416,8 +410,18 @@ if handler and line_bot_api:
             # 🆕 Call enhanced RAG API
             rag_response = call_enhanced_rag_api(user_text)
 
-            if rag_response and "flex_message" in rag_response:
-                # 🆕 Extract flex_message from RAG response
+            if rag_response and "type" in rag_response and rag_response["type"] == "flex":
+                # 🆕 Direct Flex Message response from backend
+                flex_message = FlexSendMessage(
+                    alt_text=rag_response.get("alt_text", "失智症警訊分析結果"),
+                    contents=rag_response["contents"]
+                )
+
+                line_bot_api.reply_message(reply_token, flex_message)
+                logger.info(f"✅ Sent Flex Message to {user_id}")
+
+            elif rag_response and "flex_message" in rag_response:
+                # 🆕 Extract flex_message from RAG response (legacy format)
                 flex_contents = rag_response["flex_message"]["contents"]
 
                 flex_message = FlexSendMessage(

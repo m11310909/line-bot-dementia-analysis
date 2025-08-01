@@ -950,19 +950,14 @@ def info():
     }
 
 if __name__ == "__main__":
->>>>>>> Stashed changes
     print("🚀 Starting Enhanced LINE Bot Demo with M1+M2+M3 integration...")
     print("💡 This is a demo mode - no LINE credentials required")
     print("🌐 Access demo at: http://localhost:8000/demo")
     print("🔍 Comprehensive analysis at: http://localhost:8000/demo/comprehensive")
-<<<<<<< Updated upstream
-    uvicorn.run(app, host="0.0.0.0", port=8000) 
-=======
     
     uvicorn.run(
         app,
         host="0.0.0.0",
         port=8000,
         log_level="info"
-    ) 
->>>>>>> Stashed changes
+    )

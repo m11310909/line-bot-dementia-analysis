@@ -6,6 +6,7 @@ M3 模組：行為心理症狀分類 (BPSD)
 from typing import Dict, List, Any
 from dataclasses import dataclass
 from enum import Enum
+from safe_enum_handler import safe_enum_value
 
 class BPSDCategory(Enum):
     AGITATION = "激動/攻擊"
@@ -215,7 +216,7 @@ class M3BPSDClassificationModule:
         
         return {
             "type": "flex",
-            "altText": f"行為心理症狀分析：{symptom_info.category.value}",
+            "altText": f"行為心理症狀分析：{safe_enum_value(symptom_info.category, 'unknown')}",
             "contents": {
                 "type": "bubble",
                 "size": "kilo",
@@ -225,7 +226,7 @@ class M3BPSDClassificationModule:
                     "contents": [
                         {
                             "type": "text",
-                            "text": f"{symptom_info.icon} {symptom_info.category.value}",
+                            "text": f"{symptom_info.icon} {safe_enum_value(symptom_info.category, 'unknown')}",
                             "weight": "bold",
                             "size": "lg",
                             "color": "#ffffff"

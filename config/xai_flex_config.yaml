@@ -1,0 +1,25 @@
+genai:
+  default_provider: openai
+  max_tokens: 2000
+  temperature: 0.7
+  timeout: 30
+modules:
+  M1:
+    confidence_threshold: 0.6
+    enabled: true
+  M2:
+    confidence_threshold: 0.7
+    enabled: true
+  M3:
+    confidence_threshold: 0.6
+    enabled: true
+system:
+  debug: false
+  log_level: INFO
+  max_chunks_per_request: 10
+  response_cache_ttl: 300
+visual:
+  accessibility_mode: false
+  component_cache: true
+  default_theme: healthcare
+  language: zh-TW

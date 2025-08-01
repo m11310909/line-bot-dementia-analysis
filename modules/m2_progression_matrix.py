@@ -6,6 +6,7 @@ M2 模組：病程階段評估矩陣
 from typing import Dict, List, Any
 from dataclasses import dataclass
 from enum import Enum
+from safe_enum_handler import safe_enum_value
 
 class Stage(Enum):
     MILD = "輕度"
@@ -113,7 +114,7 @@ class M2ProgressionMatrixModule:
             "detected_stage": detected_stage,
             "stage_info": self.stages[detected_stage],
             "confidence": "high" if symptom_scores[detected_stage] > 0 else "low",
-            "analysis": f"根據描述，可能處於{detected_stage.value}階段"
+            "analysis": f"根據描述，可能處於{safe_enum_value(detected_stage, 'unknown')}階段"
         }
     
     def create_progression_card(self, user_input: str, stage_analysis: Dict) -> Dict:
@@ -122,7 +123,7 @@ class M2ProgressionMatrixModule:
         
         return {
             "type": "flex",
-            "altText": f"病程階段評估：{stage_info.stage.value}",
+            "altText": f"病程階段評估：{safe_enum_value(stage_info.stage, 'unknown')}",
             "contents": {
                 "type": "bubble",
                 "size": "kilo",
@@ -132,7 +133,7 @@ class M2ProgressionMatrixModule:
                     "contents": [
                         {
                             "type": "text",
-                            "text": f"{stage_info.icon} {stage_info.stage.value}階段評估",
+                            "text": f"{stage_info.icon} {safe_enum_value(stage_info.stage, 'unknown')}階段評估",
                             "weight": "bold",
                             "size": "lg",
                             "color": "#ffffff"

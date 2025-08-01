@@ -1,0 +1,180 @@
+# M1 十大警訊比對卡 - 模組配置
+# 基於 M1.fig 設計檔規格書
+
+module:
+  name: "M1"
+  version: "1.0.0"
+  description: "十大警訊比對卡 - XAI 視覺化模組"
+
+# Design Tokens 設計變數
+design_tokens:
+  colors:
+    # Semantic Colors
+    success: "#4CAF50"      # 正常老化
+    warning: "#FF9800"      # 警訊徵兆
+    info: "#2196F3"         # 資訊提示
+    confidence: "#1976D2"    # AI 信心度
+    
+    # Text Colors
+    text_primary: "#212121"   # 主要文字
+    text_secondary: "#666666" # 次要文字
+    text_on_color: "#FFFFFF"  # 色塊上文字
+    
+    # Background Colors
+    bg_normal: "#E8F5E9"     # 正常老化背景
+    bg_warning: "#FFF3E0"    # 警訊徵兆背景
+    bg_card: "#FFFFFF"       # 卡片背景
+    bg_subtle: "#F5F5F5"     # 輔助背景
+  
+  typography:
+    text_xs: "12px"     # 標註文字
+    text_sm: "14px"     # 輔助文字
+    text_base: "16px"   # 內文
+    text_lg: "18px"     # 副標題
+    text_xl: "20px"     # 標題
+    
+    leading_tight: 1.4
+    leading_base: 1.6
+    leading_relaxed: 1.8
+    
+    font_normal: 400
+    font_medium: 500
+    font_bold: 700
+  
+  spacing:
+    xs: "4px"
+    sm: "8px"
+    md: "12px"
+    lg: "16px"
+    xl: "20px"
+    "2xl": "24px"
+
+# Component Library 元件庫配置
+components:
+  atoms:
+    confidence_badge:
+      enabled: true
+      show_icon: true
+      color_thresholds:
+        high: 80
+        medium: 50
+        low: 0
+    
+    warning_level_indicator:
+      enabled: true
+      levels:
+        normal:
+          icon: "✓"
+          color: "#4CAF50"
+        caution:
+          icon: "⚠"
+          color: "#FF9800"
+        warning:
+          icon: "⚠️"
+          color: "#FF5722"
+    
+    action_button:
+      enabled: true
+      sizes:
+        small: "36px"
+        medium: "44px"
+        large: "52px"
+      styles:
+        primary:
+          color: "#2196F3"
+          background: "#2196F3"
+        secondary:
+          color: "#666666"
+          background: "transparent"
+        text:
+          color: "#2196F3"
+          background: "transparent"
+  
+  molecules:
+    comparison_card:
+      enabled: true
+      max_cards: 2
+      corner_radius: "8px"
+      padding: "16px"
+    
+    ai_reasoning_path:
+      enabled: true
+      max_steps: 4
+      separator: "→"
+    
+    confidence_meter:
+      enabled: true
+      show_label: true
+      animated: false
+      height: "8px"
+      corner_radius: "4px"
+  
+  organisms:
+    flex_bubble:
+      enabled: true
+      size: "mega"
+      max_carousel_items: 3
+
+# XAI 配置
+xai:
+  confidence_thresholds:
+    high: 0.8
+    medium: 0.6
+    low: 0.4
+  
+  reasoning_steps:
+    - "輸入症狀"
+    - "AI 分析"
+    - "比對資料"
+    - "生成結果"
+  
+  explanation_components:
+    - "confidence_meter"
+    - "comparison_cards"
+    - "reasoning_path"
+    - "key_finding"
+
+# 無障礙配置
+accessibility:
+  enabled: true
+  color_contrast_ratio: 4.5
+  touch_target_min_size: "44px"
+  text_scaling: true
+  screen_reader_support: true
+  focus_indicators: true
+
+# 互動配置
+interactions:
+  feedback_collection: true
+  detailed_view: true
+  share_functionality: true
+  bookmark_feature: true
+
+# 性能配置
+performance:
+  cache_enabled: true
+  max_response_time: 3000  # ms
+  image_optimization: true
+  lazy_loading: true
+
+# 本地化配置
+localization:
+  default_language: "zh-TW"
+  supported_languages:
+    - "zh-TW"
+    - "en-US"
+  fallback_text: true
+
+# 錯誤處理配置
+error_handling:
+  graceful_degradation: true
+  user_friendly_messages: true
+  retry_mechanism: true
+  logging_level: "INFO"
+
+# 測試配置
+testing:
+  mock_data_enabled: true
+  visual_regression_testing: true
+  accessibility_testing: true
+  performance_testing: true 

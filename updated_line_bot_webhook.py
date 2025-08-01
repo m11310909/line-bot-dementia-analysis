@@ -335,7 +335,7 @@ def call_enhanced_rag_api(user_input: str) -> Optional[Dict[str, Any]]:
         # 使用增強版 RAG API
         response = requests.post(
             FLEX_API_URL,
-            json={"user_input": user_input},
+            json={"text": user_input, "user_id": "line_user"},
             timeout=30,
             headers={"Content-Type": "application/json"}
         )

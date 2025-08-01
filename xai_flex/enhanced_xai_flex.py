@@ -200,13 +200,55 @@ class SimpleConfig:
     def _setup_logging(self):
         """設定日誌"""
         log_level = getattr(logging, self.config['system']['log_level'].upper())
+        
+        # Ensure logs directory exists
+        import os
+        logs_dir = 'logs'
+        if not os.path.exists(logs_dir):
+            try:
+                os.makedirs(logs_dir, exist_ok=True)
+            except Exception as e:
+                print(f"Warning: Could not create logs directory: {e}")
+        
+        # Setup logging handlers
+        handlers = [logging.StreamHandler()]
+        
+        # Add file handler only if logs directory exists and is writable
+        if os.path.exists(logs_dir) and os.access(logs_dir, os.W_OK):
+            try:
+                file_handler = # Ensure logs directory exists
+import os
+logs_dir = os.path.dirname('logs/xai_flex.log')
+if not os.path.exists(logs_dir):
+    try:
+        os.makedirs(logs_dir, exist_ok=True)
+    except Exception as e:
+        print(f"Warning: Could not create logs directory: {e}")
+
+# Setup logging handlers
+handlers = [logging.StreamHandler()]
+
+# Add file handler only if logs directory exists and is writable
+if os.path.exists(logs_dir) and os.access(logs_dir, os.W_OK):
+    try:
+        file_handler = logging.FileHandler('logs/xai_flex.log', encoding='utf-8')
+        handlers.append(file_handler)
+    except Exception as e:
+        print(f"Warning: Could not create log file: {e}")
+
+logging.basicConfig(
+    level=log_level,
+    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
+    handlers=handlers
+)
+                handlers.append(file_handler)
+            except Exception as e:
+                print(f"Warning: Could not create log file: {e}")
+        
         logging.basicConfig(
             level=log_level,
             format='%(asctime)s - %(name)s - %(levelname)s - %(message)s',
-            handlers=[
-                logging.StreamHandler(),
-                logging.FileHandler('logs/xai_flex.log', encoding='utf-8')
-            ] if not self.config['system']['debug'] else [logging.StreamHandler()]
+            handlers=handlers if not self.config['system']['debug'] else [logging.StreamHandler()]
         )
 
     def get(self, key_path: str, default=None):

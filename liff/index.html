@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>失智症警訊分析 - 詳細報告</title>
+    <script charset="utf-8" src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            text-align: center;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .header h1 {
+            color: #2c3e50;
+            font-size: 24px;
+            margin-bottom: 10px;
+            font-weight: 700;
+        }
+
+        .header p {
+            color: #7f8c8d;
+            font-size: 16px;
+        }
+
+        .analysis-card {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        }
+
+        .card-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+        }
+
+        .card-title::before {
+            content: "🔍";
+            margin-right: 10px;
+            font-size: 20px;
+        }
+
+        .symptom-item {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #3498db;
+        }
+
+        .symptom-title {
+            font-weight: 600;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .symptom-description {
+            color: #7f8c8d;
+            font-size: 14px;
+            line-height: 1.4;
+        }
+
+        .recommendations {
+            background: #e8f5e8;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #27ae60;
+        }
+
+        .recommendations .card-title::before {
+            content: "💡";
+        }
+
+        .contact-info {
+            background: #fff3cd;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #ffc107;
+        }
+
+        .contact-info .card-title::before {
+            content: "📞";
+        }
+
+        .contact-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .contact-item:last-child {
+            border-bottom: none;
+        }
+
+        .contact-name {
+            font-weight: 500;
+            color: #2c3e50;
+        }
+
+        .contact-number {
+            color: #3498db;
+            font-weight: 600;
+        }
+
+        .emergency {
+            background: #f8d7da;
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 10px;
+            border-left: 4px solid #dc3545;
+        }
+
+        .emergency .card-title::before {
+            content: "🚨";
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 25px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s;
+            width: 100%;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #7f8c8d;
+        }
+
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🧠 失智症警訊分析</h1>
+            <p>詳細報告與專業建議</p>
+        </div>
+
+        <div id="loading" class="loading">
+            <h3>載入中...</h3>
+            <p>正在分析您的症狀資訊</p>
+        </div>
+
+        <div id="content" class="hidden">
+            <div class="analysis-card">
+                <div class="card-title">症狀分析</div>
+                <div id="symptoms-container">
+                    <!-- Symptoms will be loaded here -->
+                </div>
+            </div>
+
+            <div class="analysis-card">
+                <div class="card-title">專業建議</div>
+                <div id="recommendations-container">
+                    <!-- Recommendations will be loaded here -->
+                </div>
+            </div>
+
+            <div class="analysis-card">
+                <div class="card-title">緊急聯絡資訊</div>
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <span class="contact-name">失智症關懷專線</span>
+                        <span class="contact-number">0800-474-580</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-name">24小時緊急醫療</span>
+                        <span class="contact-number">119</span>
+                    </div>
+                    <div class="contact-item">
+                        <span class="contact-name">長照專線</span>
+                        <span class="contact-number">1966</span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="emergency">
+                <div class="card-title">緊急提醒</div>
+                <p>如果您或家人出現以下症狀，請立即就醫：</p>
+                <ul style="margin-top: 10px; padding-left: 20px;">
+                    <li>嚴重的記憶力減退</li>
+                    <li>行為異常或攻擊性</li>
+                    <li>幻覺或妄想症狀</li>
+                    <li>無法自理日常生活</li>
+                </ul>
+            </div>
+
+            <button class="btn" onclick="closeLiff()">關閉報告</button>
+        </div>
+
+        <div id="error" class="error hidden">
+            <h3>載入失敗</h3>
+            <p>無法載入分析報告，請稍後再試。</p>
+            <button class="btn" onclick="closeLiff()">關閉</button>
+        </div>
+    </div>
+
+    <script>
+        // Initialize LIFF
+        liff.init({ liffId: "YOUR_LIFF_ID" })
+            .then(() => {
+                console.log("LIFF initialized");
+                loadAnalysisData();
+            })
+            .catch((err) => {
+                console.error("LIFF initialization failed", err);
+                showError();
+            });
+
+        function loadAnalysisData() {
+            // Get URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const analysisData = urlParams.get('analysis');
+            
+            if (analysisData) {
+                try {
+                    const data = JSON.parse(decodeURIComponent(analysisData));
+                    displayAnalysis(data);
+                } catch (e) {
+                    console.error("Error parsing analysis data:", e);
+                    showDefaultContent();
+                }
+            } else {
+                showDefaultContent();
+            }
+        }
+
+        function displayAnalysis(data) {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('content');
+            const symptomsContainer = document.getElementById('symptoms-container');
+            const recommendationsContainer = document.getElementById('recommendations-container');
+
+            loading.classList.add('hidden');
+            content.classList.remove('hidden');
+
+            // Display symptoms
+            if (data.symptom_titles && data.symptom_titles.length > 0) {
+                data.symptom_titles.forEach(symptom => {
+                    const symptomDiv = document.createElement('div');
+                    symptomDiv.className = 'symptom-item';
+                    symptomDiv.innerHTML = `
+                        <div class="symptom-title">${symptom}</div>
+                        <div class="symptom-description">檢測到相關症狀，建議進一步評估</div>
+                    `;
+                    symptomsContainer.appendChild(symptomDiv);
+                });
+            } else {
+                symptomsContainer.innerHTML = '<p>未檢測到明顯症狀，建議持續觀察</p>';
+            }
+
+            // Display recommendations
+            if (data.action_suggestions && data.action_suggestions.length > 0) {
+                data.action_suggestions.forEach(suggestion => {
+                    const recDiv = document.createElement('div');
+                    recDiv.className = 'recommendations';
+                    recDiv.innerHTML = `<p>• ${suggestion}</p>`;
+                    recommendationsContainer.appendChild(recDiv);
+                });
+            } else {
+                recommendationsContainer.innerHTML = '<p>建議定期健康檢查並注意症狀變化</p>';
+            }
+        }
+
+        function showDefaultContent() {
+            const loading = document.getElementById('loading');
+            const content = document.getElementById('content');
+            const symptomsContainer = document.getElementById('symptoms-container');
+            const recommendationsContainer = document.getElementById('recommendations-container');
+
+            loading.classList.add('hidden');
+            content.classList.remove('hidden');
+
+            symptomsContainer.innerHTML = `
+                <div class="symptom-item">
+                    <div class="symptom-title">記憶力減退</div>
+                    <div class="symptom-description">常見的失智症早期症狀，建議進行認知功能評估</div>
+                </div>
+                <div class="symptom-item">
+                    <div class="symptom-title">日常生活能力下降</div>
+                    <div class="symptom-description">影響日常活動，需要評估照護需求</div>
+                </div>
+            `;
+
+            recommendationsContainer.innerHTML = `
+                <div class="recommendations">
+                    <p>• 建議及早就醫進行認知功能評估</p>
+                </div>
+                <div class="recommendations">
+                    <p>• 尋求神經科醫師協助</p>
+                </div>
+                <div class="recommendations">
+                    <p>• 考慮進行腦部影像檢查</p>
+                </div>
+                <div class="recommendations">
+                    <p>• 評估日常生活能力</p>
+                </div>
+            `;
+        }
+
+        function showError() {
+            const loading = document.getElementById('loading');
+            const error = document.getElementById('error');
+            
+            loading.classList.add('hidden');
+            error.classList.remove('hidden');
+        }
+
+        function closeLiff() {
+            if (liff.isInClient()) {
+                liff.closeWindow();
+            } else {
+                window.close();
+            }
+        }
+
+        // Add some interactive features
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click handlers for contact numbers
+            const contactNumbers = document.querySelectorAll('.contact-number');
+            contactNumbers.forEach(number => {
+                number.style.cursor = 'pointer';
+                number.addEventListener('click', function() {
+                    if (liff.isInClient()) {
+                        liff.openWindow({
+                            url: `tel:${this.textContent}`,
+                            external: true
+                        });
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html> 

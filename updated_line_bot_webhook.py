@@ -8,12 +8,16 @@ from fastapi import FastAPI, Request, HTTPException
 from fastapi.responses import JSONResponse
 from linebot import LineBotApi, WebhookHandler
 from linebot.exceptions import InvalidSignatureError, LineBotApiError
-from linebot.models import MessageEvent, TextMessage, FlexSendMessage, TextSendMessage, FollowEvent
+from linebot.models import MessageEvent, TextMessage, FlexSendMessage, TextSendMessage, FollowEvent, PostbackEvent
 import requests
 import os
 import logging
 import traceback
 from typing import Optional, Dict, Any
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -31,9 +35,9 @@ LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
 
 # 🆕 Updated for RAG API integration
-FLEX_API_URL = os.getenv('FLEX_API_URL', 'http://localhost:8000/demo/message')  # ← 更新為 8000
-RAG_HEALTH_URL = os.getenv('RAG_HEALTH_URL', 'http://localhost:8000/health')  # ← 新增健康檢查
-RAG_ANALYZE_URL = os.getenv('RAG_ANALYZE_URL', 'http://localhost:8000/demo/comprehensive')  # ← 新增詳細分析
+FLEX_API_URL = os.getenv('FLEX_API_URL', 'http://localhost:8005/comprehensive-analysis')  # ← 更新為 8005
+RAG_HEALTH_URL = os.getenv('RAG_HEALTH_URL', 'http://localhost:8005/health')  # ← 新增健康檢查
+RAG_ANALYZE_URL = os.getenv('RAG_ANALYZE_URL', 'http://localhost:8005/comprehensive-analysis')  # ← 新增詳細分析
 
 # Replit-specific configuration
 REPL_SLUG = os.getenv('REPL_SLUG', 'workspace')
@@ -476,6 +480,98 @@ if handler and line_bot_api:
         except Exception as e:
             logger.error(f"❌ Follow handler error: {e}")
 
+    @handler.add(PostbackEvent)
+    def handle_postback(event):
+        """Handle postback events from Flex Message buttons"""
+        try:
+            user_id = event.source.user_id
+            reply_token = event.reply_token
+            postback_data = event.postback.data
+            logger.info(f"📱 Postback received from {user_id}: {postback_data}")
+
+            if postback_data == "action=more_suggestions":
+                # Provide additional suggestions based on the context
+                additional_suggestions = {
+                    "type": "bubble",
+                    "size": "mega",
+                    "header": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "backgroundColor": "#F8F9FA",
+                        "paddingAll": "16px",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "💡 額外建議",
+                                "size": "xl",
+                                "weight": "bold",
+                                "color": "#212121"
+                            }
+                        ]
+                    },
+                    "body": {
+                        "type": "box",
+                        "layout": "vertical",
+                        "spacing": "md",
+                        "paddingAll": "16px",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "🔍 進一步評估建議",
+                                "size": "sm",
+                                "weight": "bold",
+                                "color": "#666666"
+                            },
+                            {
+                                "type": "text",
+                                "text": "• 建議進行認知功能評估\n• 尋求神經科醫師協助\n• 考慮進行腦部影像檢查\n• 評估日常生活能力",
+                                "size": "sm",
+                                "wrap": True,
+                                "margin": "sm",
+                                "color": "#666666"
+                            },
+                            {
+                                "type": "separator",
+                                "margin": "md"
+                            },
+                            {
+                                "type": "text",
+                                "text": "📞 緊急聯絡資訊",
+                                "size": "sm",
+                                "weight": "bold",
+                                "color": "#666666"
+                            },
+                            {
+                                "type": "text",
+                                "text": "• 失智症關懷專線: 0800-474-580\n• 24小時緊急醫療: 119\n• 長照專線: 1966",
+                                "size": "sm",
+                                "wrap": True,
+                                "margin": "sm",
+                                "color": "#666666"
+                            }
+                        ]
+                    }
+                }
+
+                flex_message = FlexSendMessage(
+                    alt_text="額外建議與聯絡資訊",
+                    contents=additional_suggestions
+                )
+                line_bot_api.reply_message(reply_token, flex_message)
+                logger.info(f"📤 Sent additional suggestions to {user_id}")
+
+            else:
+                # Default response for unknown postback
+                text_message = TextSendMessage(text="感謝您的使用！如有任何問題，請隨時詢問。")
+                line_bot_api.reply_message(reply_token, text_message)
+                logger.info(f"📤 Sent default postback response to {user_id}")
+
+        except LineBotApiError as e:
+            logger.error(f"❌ LINE Bot API error in postback handler: {e}")
+        except Exception as e:
+            logger.error(f"❌ Postback handler error: {e}")
+            logger.error(traceback.format_exc())
+
 @app.get("/info")
 async def bot_info():
     """Get bot information with RAG enhancement details"""
@@ -562,6 +658,6 @@ if __name__ == "__main__":
     uvicorn.run(
         app,
         host="0.0.0.0",
-        port=3000,  # Keep original port for compatibility
+        port=8081,  # Changed to match ngrok tunnel
         log_level="info"
     )

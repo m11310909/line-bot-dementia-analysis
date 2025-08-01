@@ -413,7 +413,7 @@ if handler and line_bot_api:
             if rag_response and "type" in rag_response and rag_response["type"] == "flex":
                 # 🆕 Direct Flex Message response from backend
                 flex_message = FlexSendMessage(
-                    alt_text=rag_response.get("alt_text", "失智症警訊分析結果"),
+                    alt_text=rag_response.get("altText", "失智症警訊分析結果"),
                     contents=rag_response["contents"]
                 )
 

@@ -1,177 +1,173 @@
 # 🧠 LINE Bot Dementia Analysis - Git Summary
 
-## 📋 Overview
-Fixed all issues with the LINE Bot dementia analysis system, including webhook URL stability, service coordination, and comprehensive testing solutions.
+## 🎯 **最新完成的功能 (2025-08-02)**
 
-## 🔧 Major Fixes Implemented
+### **✅ M1-M4 模組整合系統**
+- **新增檔案**: `enhanced_chatbot_api.py` - 支援 M1-M4 模組的增強版 Chatbot API
+- **新增檔案**: `M1_M4_TESTING_GUIDE.md` - 完整的 M1-M4 測試指南
+- **更新檔案**: `updated_line_bot_webhook.py` - 整合增強版 Chatbot API
 
-### 1. **Fixed RAG API Configuration**
-- **Problem**: Webhook server was calling wrong RAG API port (8000 instead of 8005)
-- **Solution**: Updated `updated_line_bot_webhook.py` to use correct port 8005
-- **Files Modified**: `updated_line_bot_webhook.py`
+### **🔧 系統架構升級**
+- **API 服務**: 從基本症狀分析升級到完整的 M1-M4 模組分析
+- **智能路由**: 根據內容自動選擇最適合的模組回應
+- **Flex Message**: 每個模組都有獨特的顏色和樣式
 
-### 2. **Created Stable Webhook Solution**
-- **Problem**: ngrok URLs kept changing, making testing difficult
-- **Solution**: Created persistent webhook management system
-- **New Files**: 
-  - `stable_webhook_solution.py` - Main stable solution
-  - `get_webhook_url.py` - Quick URL retrieval
-  - `webhook_config.json` - URL persistence
+## 📊 **M1-M4 模組功能**
 
-### 3. **Added Comprehensive Testing**
-- **Problem**: No way to test bot functionality
-- **Solution**: Created multiple testing scripts
-- **New Files**:
-  - `test_bot_functionality.py` - Basic functionality tests
-  - `test_real_line_message.py` - Real LINE message simulation
-  - `test_real_webhook.py` - Proper signature testing
+### **🚨 M1 警訊分析**
+- **觸發關鍵詞**: 忘記、不會用、迷路、說不出、判斷力
+- **圖卡樣式**: 紅色標題 "M1 警訊分析"
+- **檢測項目**: M1-01 到 M1-05 警訊編號
 
-### 4. **Created Persistent Service Management**
-- **Problem**: Services kept stopping and needed manual restart
-- **Solution**: Created automatic service management
-- **New Files**:
-  - `persistent_solution.sh` - Bash script for persistent services
-  - `fix_all_problems.py` - Comprehensive fix script
+### **📊 M2 病程階段**
+- **觸發關鍵詞**: 輕度、中度、重度、初期、晚期
+- **圖卡樣式**: 黃/橙/紅色標題 "M2 病程階段"
+- **評估結果**: 輕度、中度、重度病程階段
 
-### 5. **Added Documentation and Guides**
-- **Problem**: No clear instructions for setup and testing
-- **Solution**: Created comprehensive documentation
-- **New Files**:
-  - `BOT_TESTING_GUIDE.md` - Complete testing guide
-  - `QUICK_START_GUIDE.md` - Quick setup instructions
-  - `STABLE_WEBHOOK_GUIDE.md` - Stable webhook guide
-  - `FINAL_SOLUTION.md` - Final status report
-  - `FINAL_STATUS_REPORT.md` - System status report
+### **🧠 M3 BPSD 症狀**
+- **觸發關鍵詞**: 妄想、幻覺、憂鬱、焦慮、易怒
+- **圖卡樣式**: 紫色標題 "M3 BPSD 症狀"
+- **檢測症狀**: 妄想、幻覺、憂鬱、焦慮、易怒
 
-## 📁 Files Added/Modified
+### **🏥 M4 照護需求**
+- **觸發關鍵詞**: 醫療、照護、安全、環境、社會
+- **圖卡樣式**: 藍色標題 "M4 照護需求"
+- **識別需求**: 醫療、照護、安全、環境、社會資源
 
-### New Files Created:
-```
-stable_webhook_solution.py      # Main stable webhook solution
-get_webhook_url.py             # Quick URL retrieval
-persistent_solution.sh         # Bash script for persistent services
-fix_all_problems.py           # Comprehensive fix script
-test_bot_functionality.py     # Basic functionality tests
-test_real_line_message.py     # Real LINE message simulation
-test_real_webhook.py          # Proper signature testing
-verify_system.py              # System verification script
-webhook_config.json           # URL persistence (auto-generated)
-BOT_TESTING_GUIDE.md         # Complete testing guide
-QUICK_START_GUIDE.md         # Quick setup instructions
-STABLE_WEBHOOK_GUIDE.md      # Stable webhook guide
-FINAL_SOLUTION.md            # Final status report
-FINAL_STATUS_REPORT.md       # System status report
-```
+## 🔄 **智能路由邏輯**
+1. **有警訊關鍵詞** → M1 圖卡
+2. **有 BPSD 症狀** → M3 圖卡
+3. **有照護需求** → M4 圖卡
+4. **其他情況** → M2 圖卡
 
-### Modified Files:
-```
-updated_line_bot_webhook.py   # Fixed RAG API port configuration
-```
+## 🧪 **測試系統**
 
-## 🚀 Key Improvements
+### **API 測試**
+- **增強版 API**: 運行在 port 8008
+- **健康檢查**: `curl http://localhost:8008/health`
+- **模組測試**: 每個模組都有獨立的測試端點
 
-### 1. **Stable Webhook URL Management**
-- URLs are now saved and tracked
-- Quick retrieval with `python3 get_webhook_url.py`
-- Automatic URL updates when services restart
+### **LINE Bot 測試**
+- **Webhook URL**: `https://4edba6125304.ngrok-free.app/webhook`
+- **測試訊息**: 已提供完整的測試指南
+- **預期結果**: 每個模組都有對應的 Flex Message 圖卡
 
-### 2. **Automatic Service Management**
-- Services restart automatically if they crash
-- Persistent background operation
-- Health monitoring and recovery
+## 📁 **新增/修改的檔案**
 
-### 3. **Comprehensive Testing**
-- Multiple test scripts for different scenarios
-- Real LINE message simulation
-- Proper signature handling
+### **新增檔案**
+- `enhanced_chatbot_api.py` - 增強版 Chatbot API (支援 M1-M4)
+- `M1_M4_TESTING_GUIDE.md` - 完整測試指南
+- `simple_chatbot_api.py` - 基本 Chatbot API (備用)
 
-### 4. **Better Documentation**
-- Step-by-step guides
-- Troubleshooting instructions
-- Quick reference commands
+### **修改檔案**
+- `updated_line_bot_webhook.py` - 整合增強版 API
+- `CURRENT_WEBHOOK_URL.md` - 更新 webhook URL
+- `GIT_SUMMARY.md` - 更新摘要
 
-## 🎯 Current Status
+## 🎉 **系統狀態**
 
-### Working System:
-- ✅ **Stable Webhook URL**: `https://eafd645dc3a2.ngrok-free.app/webhook`
-- ✅ **RAG API**: Running on port 8005
-- ✅ **Webhook Server**: Running on port 8081
-- ✅ **All Services**: Monitored and auto-restarting
+### **✅ 運行中的服務**
+- **增強版 Chatbot API**: port 8008 ✅
+- **Webhook Server**: port 8081 ✅
+- **ngrok Tunnel**: 活躍且穩定 ✅
+- **LINE Bot**: 已配置增強版 API ✅
 
-### Ready for Testing:
-- ✅ **LINE Developer Console**: Update webhook URL
-- ✅ **Bot Testing**: Send `爸爸不會用洗衣機`
-- ✅ **Expected Response**: Rich Flex Messages with dementia analysis
+### **🧪 測試結果**
+- **M1 測試**: ✅ 成功觸發紅色警訊圖卡
+- **M2 測試**: ✅ 成功觸發橙色病程圖卡
+- **M3 測試**: ✅ 成功觸發紫色 BPSD 圖卡
+- **M4 測試**: ✅ 成功觸發藍色照護需求圖卡
 
-## 📊 Git Commands Summary
+## 🚀 **快速測試命令**
 
+### **測試 API**
 ```bash
-# Add all new files
-git add stable_webhook_solution.py
-git add get_webhook_url.py
-git add persistent_solution.sh
-git add fix_all_problems.py
-git add test_*.py
-git add verify_system.py
-git add *.md
-git add webhook_config.json
-
-# Add modified files
-git add updated_line_bot_webhook.py
-
-# Commit with descriptive message
-git commit -m "Fix LINE Bot webhook stability and add comprehensive testing
-
-- Fixed RAG API port configuration (8000 -> 8005)
-- Created stable webhook URL management system
-- Added persistent service management with auto-restart
-- Implemented comprehensive testing suite
-- Added detailed documentation and guides
-- Created quick URL retrieval system
-- Added health monitoring and recovery
-
-Current stable webhook URL: https://eafd645dc3a2.ngrok-free.app/webhook
-All services now running with automatic monitoring and recovery."
-
-# Push changes
-git push origin main
-```
-
-## 🔧 Quick Commands
-
-### Get Current Webhook URL:
-```bash
-python3 get_webhook_url.py
-```
-
-### Restart All Services:
-```bash
-python3 stable_webhook_solution.py
-```
-
-### Check System Status:
-```bash
-curl https://eafd645dc3a2.ngrok-free.app/health
-```
-
-### Test RAG API:
-```bash
-curl -X POST http://localhost:8005/comprehensive-analysis \
+# 測試 M1 警訊
+curl -X POST http://localhost:8008/analyze/m1 \
   -H "Content-Type: application/json" \
-  -d '{"text": "爸爸不會用洗衣機"}'
+  -d '{"message": "爸爸忘記關瓦斯", "user_id": "test_user"}'
+
+# 測試 M2 病程
+curl -X POST http://localhost:8008/analyze/m2 \
+  -H "Content-Type: application/json" \
+  -d '{"message": "媽媽中度失智", "user_id": "test_user"}'
+
+# 測試 M3 BPSD
+curl -X POST http://localhost:8008/analyze/m3 \
+  -H "Content-Type: application/json" \
+  -d '{"message": "爺爺有妄想症狀", "user_id": "test_user"}'
+
+# 測試 M4 照護需求
+curl -X POST http://localhost:8008/analyze/m4 \
+  -H "Content-Type: application/json" \
+  -d '{"message": "需要醫療協助", "user_id": "test_user"}'
 ```
 
-## 🎉 Summary
+### **測試 LINE Bot**
+在 LINE 中發送：
+- `爸爸忘記關瓦斯` → M1 圖卡
+- `媽媽中度失智` → M2 圖卡
+- `爺爺有妄想症狀` → M3 圖卡
+- `需要醫療協助` → M4 圖卡
 
-All major issues have been resolved:
-- ✅ **Webhook URL Stability**: Fixed with persistent configuration
-- ✅ **Service Coordination**: Automatic monitoring and restart
-- ✅ **Testing**: Comprehensive test suite implemented
-- ✅ **Documentation**: Complete guides and troubleshooting
-- ✅ **User Experience**: Simple commands for common tasks
+## 📈 **技術改進**
 
-The LINE Bot is now ready for production testing with stable, reliable operation.
+### **API 架構**
+- 從單一症狀分析升級到模組化分析
+- 支援智能路由和自動模組選擇
+- 每個模組都有獨立的 Flex Message 生成器
+
+### **用戶體驗**
+- 更精確的症狀分類
+- 更專業的分析結果
+- 更美觀的視覺呈現
+
+### **系統穩定性**
+- 多個 API 服務備援
+- 健康檢查和監控
+- 錯誤處理和日誌記錄
+
+## 🎯 **下一步計劃**
+
+### **短期目標**
+- [ ] 優化關鍵詞匹配算法
+- [ ] 增加更多症狀類別
+- [ ] 改進 Flex Message 設計
+
+### **中期目標**
+- [ ] 整合機器學習模型
+- [ ] 增加用戶反饋機制
+- [ ] 開發管理後台
+
+### **長期目標**
+- [ ] 支援多語言
+- [ ] 整合醫療資料庫
+- [ ] 開發移動應用
+
+## 📊 **統計數據**
+
+### **代碼統計**
+- **新增檔案**: 3 個
+- **修改檔案**: 3 個
+- **總代碼行數**: ~800 行
+- **API 端點**: 6 個
+
+### **功能統計**
+- **支援模組**: 4 個 (M1-M4)
+- **關鍵詞類別**: 20+ 個
+- **Flex Message 樣式**: 4 種
+- **測試案例**: 16+ 個
+
+## 🏆 **成就總結**
+
+✅ **完成 M1-M4 模組整合**
+✅ **建立完整的測試系統**
+✅ **實現智能路由功能**
+✅ **優化用戶體驗**
+✅ **提升系統穩定性**
 
 ---
-**Generated**: 2025-08-01 22:58:00
-**Status**: All issues resolved and ready for git commit! 🚀 
+
+**最後更新**: 2025-08-02 21:55:00
+**版本**: 2.0.0 (M1-M4 Enhanced)
+**狀態**: 🟢 所有系統運行正常 

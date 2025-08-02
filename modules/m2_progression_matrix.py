@@ -88,7 +88,7 @@ class M2ProgressionMatrixModule:
             )
         }
     
-    def analyze_progression_stage(self, user_input: str) -> Dict:
+    def analyze_progression(self, user_input: str) -> Dict:
         """分析用戶輸入，評估可能的病程階段"""
         user_input_lower = user_input.lower()
         

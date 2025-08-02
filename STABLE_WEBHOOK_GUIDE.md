@@ -5,11 +5,11 @@
 ### Stable Webhook URL
 **Use this URL in LINE Developer Console:**
 ```
-https://eafd645dc3a2.ngrok-free.app/webhook
+https://269ea09485f8.ngrok-free.app/webhook
 ```
 
 ### System Status
-- ✅ ngrok tunnel: https://eafd645dc3a2.ngrok-free.app
+- ✅ ngrok tunnel: https://269ea09485f8.ngrok-free.app
 - ✅ webhook server: Running on port 8081
 - ✅ RAG API: Running on port 8005
 - ✅ All services: Active and monitored
@@ -20,7 +20,7 @@ https://eafd645dc3a2.ngrok-free.app/webhook
 1. Go to [LINE Developer Console](https://developers.line.biz/)
 2. Select your bot channel
 3. Go to **Messaging API** settings
-4. Set **Webhook URL** to: `https://eafd645dc3a2.ngrok-free.app/webhook`
+4. Set **Webhook URL** to: `https://269ea09485f8.ngrok-free.app/webhook`
 5. **Enable** "Use webhook"
 6. Click **Save**
 
@@ -45,14 +45,14 @@ The bot will respond with:
 3. Update LINE Developer Console with the new URL
 
 ### If bot doesn't respond:
-1. Check status: `curl https://eafd645dc3a2.ngrok-free.app/health`
+1. Check status: `curl https://269ea09485f8.ngrok-free.app/health`
 2. Verify webhook URL in LINE Developer Console
 3. Restart services: `python3 stable_webhook_solution.py`
 
 ## 📊 Quick Status Check
 ```bash
 # Check if services are running
-curl https://eafd645dc3a2.ngrok-free.app/health
+curl https://269ea09485f8.ngrok-free.app/health
 
 # Check RAG API
 curl http://localhost:8005/health
@@ -62,6 +62,6 @@ cat webhook_config.json
 ```
 
 ---
-**Generated**: 2025-08-01 22:57:34
-**Stable URL**: https://eafd645dc3a2.ngrok-free.app/webhook
+**Generated**: 2025-08-02 19:28:50
+**Stable URL**: https://269ea09485f8.ngrok-free.app/webhook
 **Status**: READY FOR TESTING! 🚀

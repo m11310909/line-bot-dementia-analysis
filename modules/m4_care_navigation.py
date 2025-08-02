@@ -164,7 +164,7 @@ class M4CareNavigationModule:
             )
         }
     
-    def analyze_care_needs(self, user_input: str) -> Dict:
+    def analyze_care_tasks(self, user_input: str) -> Dict:
         """分析用戶的照護需求"""
         user_input_lower = user_input.lower()
         

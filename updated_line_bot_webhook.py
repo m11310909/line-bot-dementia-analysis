@@ -39,6 +39,11 @@ FLEX_API_URL = os.getenv('FLEX_API_URL', 'http://localhost:8005/comprehensive-an
 RAG_HEALTH_URL = os.getenv('RAG_HEALTH_URL', 'http://localhost:8005/health')  # ← 新增健康檢查
 RAG_ANALYZE_URL = os.getenv('RAG_ANALYZE_URL', 'http://localhost:8005/comprehensive-analysis')  # ← 新增詳細分析
 
+# 🆕 失智小助手chatbot API Configuration
+CHATBOT_API_URL = os.getenv('CHATBOT_API_URL', '')  # Your chatbot API URL
+CHATBOT_API_KEY = os.getenv('CHATBOT_API_KEY', '')  # Your chatbot API key
+USE_CHATBOT_API = os.getenv('USE_CHATBOT_API', 'false').lower() == 'true'  # Toggle between APIs
+
 # Replit-specific configuration
 REPL_SLUG = os.getenv('REPL_SLUG', 'workspace')
 REPL_OWNER = os.getenv('REPL_OWNER', 'ke2211975')
@@ -329,6 +334,46 @@ def create_error_flex_message(error_msg: str) -> Dict[str, Any]:
         }
     }
 
+def call_chatbot_api(user_input: str) -> Optional[Dict[str, Any]]:
+    """
+    🆕 Call 失智小助手chatbot API
+    """
+    try:
+        logger.info(f"🔄 Calling chatbot API: {CHATBOT_API_URL}")
+
+        # Prepare headers with API key if provided
+        headers = {"Content-Type": "application/json"}
+        if CHATBOT_API_KEY:
+            headers["Authorization"] = f"Bearer {CHATBOT_API_KEY}"
+
+        # Call your chatbot API
+        response = requests.post(
+            CHATBOT_API_URL,
+            json={"message": user_input, "user_id": "line_user"},
+            timeout=30,
+            headers=headers
+        )
+
+        logger.info(f"📊 Chatbot API response: {response.status_code}")
+
+        if response.status_code == 200:
+            result = response.json()
+            logger.info(f"✅ Chatbot API success: {len(str(result))} chars")
+            return result
+        else:
+            logger.error(f"❌ Chatbot API error: {response.status_code} - {response.text}")
+            return None
+
+    except requests.exceptions.Timeout:
+        logger.error("⏰ Chatbot API timeout")
+        return None
+    except requests.exceptions.ConnectionError:
+        logger.error("🔗 Cannot connect to chatbot API")
+        return None
+    except Exception as e:
+        logger.error(f"❌ Chatbot API error: {e}")
+        return None
+
 def call_enhanced_rag_api(user_input: str) -> Optional[Dict[str, Any]]:
     """
     🆕 Call enhanced RAG API with improved error handling
@@ -371,6 +416,17 @@ def call_enhanced_rag_api(user_input: str) -> Optional[Dict[str, Any]]:
         logger.error(f"❌ RAG API error: {e}")
         return None
 
+def call_analysis_api(user_input: str) -> Optional[Dict[str, Any]]:
+    """
+    🆕 Unified API caller - switches between RAG and Chatbot APIs
+    """
+    if USE_CHATBOT_API and CHATBOT_API_URL:
+        logger.info("🤖 Using 失智小助手chatbot API")
+        return call_chatbot_api(user_input)
+    else:
+        logger.info("🧠 Using Enhanced RAG API")
+        return call_enhanced_rag_api(user_input)
+
 # Event handlers - Enhanced for RAG integration
 if handler and line_bot_api:
     @handler.add(MessageEvent, message=TextMessage)
@@ -411,22 +467,22 @@ if handler and line_bot_api:
                 )
                 return
 
-            # 🆕 Call enhanced RAG API
-            rag_response = call_enhanced_rag_api(user_text)
+            # 🆕 Call unified analysis API (RAG or Chatbot)
+            analysis_response = call_analysis_api(user_text)
 
-            if rag_response and "type" in rag_response and rag_response["type"] == "flex":
+            if analysis_response and "type" in analysis_response and analysis_response["type"] == "flex":
                 # 🆕 Direct Flex Message response from backend
                 flex_message = FlexSendMessage(
-                    alt_text=rag_response.get("altText", "失智症警訊分析結果"),
-                    contents=rag_response["contents"]
+                    alt_text=analysis_response.get("altText", "失智症警訊分析結果"),
+                    contents=analysis_response["contents"]
                 )
 
                 line_bot_api.reply_message(reply_token, flex_message)
                 logger.info(f"✅ Sent Flex Message to {user_id}")
 
-            elif rag_response and "flex_message" in rag_response:
-                # 🆕 Extract flex_message from RAG response (legacy format)
-                flex_contents = rag_response["flex_message"]["contents"]
+            elif analysis_response and "flex_message" in analysis_response:
+                # 🆕 Extract flex_message from analysis response (legacy format)
+                flex_contents = analysis_response["flex_message"]["contents"]
 
                 flex_message = FlexSendMessage(
                     alt_text=rag_response["flex_message"].get("altText", "失智症警訊分析結果"),

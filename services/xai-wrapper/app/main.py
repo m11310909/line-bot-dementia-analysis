@@ -6,6 +6,7 @@ import logging
 from typing import Dict, Any, Optional
 import json
 from .flex_builder import XAIFlexMessageBuilder
+from .optimized_visualization import OptimizedVisualizationGenerator, VisualizationStage, VisualizationCache
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,6 +22,7 @@ class AnalysisRequest(BaseModel):
     user_input: str
     user_id: Optional[str] = "default_user"
     context: Dict[str, Any] = {}
+    stage: Optional[str] = "immediate"  # immediate, quick, detailed
 
 class AnalysisResponse(BaseModel):
     original_response: Dict[str, Any]
@@ -222,18 +224,28 @@ class ModuleDetector:
         return min(matches / len(pattern_keywords), 1.0)
 
 class VisualizationGenerator:
-    def generate_visualization(self, module: str, xai_data: Dict[str, Any]) -> Dict[str, Any]:
-        """Generate visualization data based on module type"""
-        if module == "M1":
-            return self.generate_m1_visualization(xai_data)
-        elif module == "M2":
-            return self.generate_m2_visualization(xai_data)
-        elif module == "M3":
-            return self.generate_m3_visualization(xai_data)
-        elif module == "M4":
-            return self.generate_m4_visualization(xai_data)
-        else:
-            return self.generate_default_visualization(xai_data)
+    def __init__(self):
+        self.optimized_generator = OptimizedVisualizationGenerator()
+        self.cache = VisualizationCache()
+    
+    def generate_visualization(self, module: str, xai_data: Dict[str, Any], stage: VisualizationStage = VisualizationStage.IMMEDIATE) -> Dict[str, Any]:
+        """Generate optimized visualization data based on module type"""
+        # 檢查快取
+        cache_key = self.cache.get_cache_key(module, xai_data.get("keywords", {}), xai_data.get("confidence", 0.0))
+        cached_result = self.cache.get(cache_key)
+        
+        if cached_result and stage == VisualizationStage.IMMEDIATE:
+            logger.info(f"✅ Using cached visualization for {module}")
+            return cached_result
+        
+        # 生成新的視覺化
+        result = self.optimized_generator.generate_visualization(module, xai_data, stage)
+        
+        # 快取結果（僅快取即時視覺化）
+        if stage == VisualizationStage.IMMEDIATE:
+            self.cache.set(cache_key, result)
+        
+        return result
     
     def generate_m1_visualization(self, xai_data: Dict[str, Any]) -> Dict[str, Any]:
         """Generate M1 warning signs comparison visualization"""
@@ -341,7 +353,7 @@ class DementiaBotWrapper:
         self.module_detector = ModuleDetector()
         self.visualization_generator = VisualizationGenerator()
     
-    async def enhance_with_xai(self, user_input: str, user_id: str = "default_user") -> Dict[str, Any]:
+    async def enhance_with_xai(self, user_input: str, user_id: str = "default_user", stage: str = "immediate") -> Dict[str, Any]:
         """Enhance chatbot response with XAI visualization"""
         try:
             # 1. Call original chatbot API
@@ -357,8 +369,14 @@ class DementiaBotWrapper:
                 xai_data["intent"]
             )
             
-            # 4. Generate visualization data
-            visualization = self.visualization_generator.generate_visualization(module, xai_data)
+            # 4. Generate visualization data with progressive loading
+            stage_mapping = {
+                "immediate": VisualizationStage.IMMEDIATE,
+                "quick": VisualizationStage.QUICK,
+                "detailed": VisualizationStage.DETAILED
+            }
+            current_stage = stage_mapping.get(stage, VisualizationStage.IMMEDIATE)
+            visualization = self.visualization_generator.generate_visualization(module, xai_data, original_response, current_stage)
             
             return {
                 "original_response": original_response,

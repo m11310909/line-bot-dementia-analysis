@@ -1,345 +1,213 @@
-# quick_test.py - 快速测试 Pinecone 连接和功能
-from pinecone import Pinecone, ServerlessSpec
-import json
+#!/usr/bin/env python3
+"""
+⚡ 快速測試腳本 - XAI 系統即時驗證
+提供快速的功能驗證和效能檢查
+"""
+
+import requests
 import time
+import json
+from typing import Dict, Any
 
-# 初始化 Pinecone 客户端
-pc = Pinecone(api_key="pcsk_4WvWXx_G5bRUFdFNzLzRHNM9rkvFMvC18TMRTaeYXVCxmWSPQLmKr4xAs4UaZg5NvVb69m")
-
-# 索引配置
-INDEX_NAME = "dementia-care-knowledge"
-DIMENSION = 384  # all-MiniLM-L6-v2 模型的维度
-
-def test_pinecone_connection():
-    """测试 Pinecone 连接"""
-    print("🔄 Testing Pinecone connection...")
-
-    try:
-        # 列出现有索引
-        indexes = pc.list_indexes()
-        print(f"✅ Connected to Pinecone! Found {len(indexes)} indexes.")
-
-        for idx in indexes:
-            print(f"  - Index: {idx.name}")
-
-        return True
-    except Exception as e:
-        print(f"❌ Connection failed: {str(e)}")
-        return False
-
-def create_index_if_not_exists():
-    """创建索引（如果不存在）"""
-    print(f"🔄 Checking if index '{INDEX_NAME}' exists...")
-
-    try:
-        existing_indexes = [idx.name for idx in pc.list_indexes()]
-
-        if INDEX_NAME not in existing_indexes:
-            print(f"📝 Creating new index: {INDEX_NAME}")
-
-            pc.create_index(
-                name=INDEX_NAME,
-                dimension=DIMENSION,
-                metric="cosine",
-                spec=ServerlessSpec(
-                    cloud="aws", 
-                    region="us-east-1"
-                )
-            )
-
-            print("⏳ Waiting for index to be ready...")
-            time.sleep(10)  # 等待索引初始化
-
-            print("✅ Index created successfully!")
-        else:
-            print("✅ Index already exists!")
-
-        return pc.Index(INDEX_NAME)
-
-    except Exception as e:
-        print(f"❌ Failed to create index: {str(e)}")
-        return None
-
-def test_basic_operations(index):
-    """测试基本的向量操作"""
-    print("🧪 Testing basic vector operations...")
-
-    try:
-        # 测试向量数据
-        test_vectors = [
-            {
-                'id': 'test-001',
-                'values': [0.1] * DIMENSION,  # 简单的测试向量
-                'metadata': {
-                    'title': '测试向量1',
-                    'content': '这是一个测试向量',
-                    'type': 'test'
-                }
-            },
-            {
-                'id': 'test-002', 
-                'values': [0.2] * DIMENSION,
-                'metadata': {
-                    'title': '测试向量2',
-                    'content': '这是另一个测试向量',
-                    'type': 'test'
-                }
-            }
-        ]
-
-        # 1. 上传向量
-        print("📤 Uploading test vectors...")
-        upsert_response = index.upsert(vectors=test_vectors)
-        print(f"✅ Uploaded {upsert_response.upserted_count} vectors")
-
-        # 等待更新
-        time.sleep(2)
-
-        # 2. 查询向量
-        print("🔍 Querying vectors...")
-        query_response = index.query(
-            vector=[0.15] * DIMENSION,  # 查询向量
-            top_k=2,
-            include_metadata=True
-        )
-
-        print(f"✅ Found {len(query_response.matches)} similar vectors:")
-        for match in query_response.matches:
-            print(f"  - ID: {match.id}, Score: {match.score:.4f}")
-            print(f"    Title: {match.metadata.get('title', 'N/A')}")
-
-        # 3. 获取索引统计
-        print("📊 Getting index statistics...")
-        stats = index.describe_index_stats()
-        print(f"✅ Index contains {stats.total_vector_count} vectors")
-
-        # 4. 清理测试数据
-        print("🧹 Cleaning up test data...")
-        index.delete(ids=['test-001', 'test-002'])
-        print("✅ Test data cleaned up")
-
-        return True
-
-    except Exception as e:
-        print(f"❌ Test operations failed: {str(e)}")
-        return False
-
-def upload_demo_knowledge(index):
-    """上传演示知识数据"""
-    print("📚 Uploading demo knowledge...")
-
-    # 需要先安装 sentence-transformers
-    try:
-        from sentence_transformers import SentenceTransformer
-        model = SentenceTransformer('sentence-transformers/all-MiniLM-L6-v2')
-        print("✅ Embedding model loaded")
-    except ImportError:
-        print("❌ sentence-transformers not installed. Run: pip install sentence-transformers")
-        return False
-    except Exception as e:
-        print(f"❌ Failed to load model: {str(e)}")
-        return False
-
-    # 演示知识数据
-    demo_chunks = [
+def quick_test_xai_system():
+    """快速測試 XAI 系統"""
+    print("⚡ XAI 系統快速測試")
+    print("="*40)
+    
+    # 測試案例
+    test_cases = [
         {
-            "chunk_id": "demo-001",
-            "title": "失智症十大警訊",
-            "content": "失智症的十大警訊包括記憶力減退、計劃事情或解決問題有困難、無法勝任原本熟悉的事務等。及早發現這些警訊有助於早期診斷和治療。",
-            "chunk_type": "warning_sign",
-            "keywords": ["失智症", "警訊", "記憶力", "診斷"]
+            "input": "爸爸忘記關瓦斯爐",
+            "expected_module": "M1",
+            "description": "M1 警訊測試"
         },
         {
-            "chunk_id": "demo-002", 
-            "title": "BPSD行為心理症狀",
-            "content": "BPSD指失智症患者的行為心理症狀，包括遊走、攻擊行為、妄想、幻覺等。了解這些症狀有助於提供適當的照護。",
-            "chunk_type": "bpsd_symptom",
-            "keywords": ["BPSD", "行為症狀", "遊走", "照護"]
+            "input": "媽媽中度失智",
+            "expected_module": "M2", 
+            "description": "M2 病程測試"
         },
         {
-            "chunk_id": "demo-003",
-            "title": "失智症溝通技巧", 
-            "content": "與失智症患者溝通時要保持耐心，使用簡單明確的語言，避免爭辯或糾正，多用肢體語言和表情來表達關愛。",
-            "chunk_type": "coping_strategy",
-            "keywords": ["溝通", "技巧", "耐心", "肢體語言"]
+            "input": "爺爺有妄想症狀",
+            "expected_module": "M3",
+            "description": "M3 BPSD 測試"
+        },
+        {
+            "input": "需要醫療協助",
+            "expected_module": "M4",
+            "description": "M4 照護測試"
         }
     ]
+    
+    results = []
+    
+    for i, test_case in enumerate(test_cases, 1):
+        print(f"\n📋 測試 {i}: {test_case['description']}")
+        print(f"   輸入: {test_case['input']}")
+        print(f"   預期模組: {test_case['expected_module']}")
+        
+        # 測試即時階段
+        print("   🔄 測試即時階段...", end=" ")
+        start_time = time.time()
+        
+        try:
+            response = requests.post(
+                "http://localhost:8009/analyze",
+                json={
+                    "user_input": test_case["input"],
+                    "user_id": "test_user",
+                    "stage": "immediate"
+                },
+                timeout=5
+            )
+            
+            response_time = time.time() - start_time
+            response.raise_for_status()
+            
+            data = response.json()
+            xai_data = data.get("xai_enhanced", {})
+            
+            actual_module = xai_data.get("module", "unknown")
+            actual_confidence = xai_data.get("confidence", 0.0)
+            
+            module_correct = actual_module == test_case["expected_module"]
+            status = "✅" if module_correct else "❌"
+            
+            print(f"{status} ({response_time:.2f}s)")
+            print(f"   實際模組: {actual_module}")
+            print(f"   信心度: {actual_confidence:.1%}")
+            
+            results.append({
+                "test_case": test_case["description"],
+                "input": test_case["input"],
+                "expected_module": test_case["expected_module"],
+                "actual_module": actual_module,
+                "confidence": actual_confidence,
+                "response_time": response_time,
+                "success": module_correct
+            })
+            
+        except Exception as e:
+            print(f"❌ 錯誤: {e}")
+            results.append({
+                "test_case": test_case["description"],
+                "input": test_case["input"],
+                "error": str(e),
+                "success": False
+            })
+    
+    # 打印總結
+    print("\n" + "="*40)
+    print("📊 快速測試總結")
+    print("="*40)
+    
+    successful_tests = [r for r in results if r.get("success", False)]
+    response_times = [r.get("response_time", 0) for r in results if "response_time" in r]
+    
+    print(f"✅ 成功測試: {len(successful_tests)}/{len(results)}")
+    if response_times:
+        print(f"⚡ 平均回應時間: {sum(response_times)/len(response_times):.2f}秒")
+        print(f"⚡ 最快回應時間: {min(response_times):.2f}秒")
+        print(f"⚡ 最慢回應時間: {max(response_times):.2f}秒")
+    
+    # 詳細結果
+    print("\n📋 詳細結果:")
+    for result in results:
+        status = "✅" if result.get("success", False) else "❌"
+        module_info = f"模組: {result.get('actual_module', 'unknown')}"
+        confidence_info = f"信心度: {result.get('confidence', 0):.1%}" if "confidence" in result else ""
+        time_info = f"時間: {result.get('response_time', 0):.2f}s" if "response_time" in result else ""
+        
+        print(f"   {status} {result['test_case']} - {module_info} {confidence_info} {time_info}")
+    
+    return results
 
-    try:
-        vectors_to_upload = []
+def test_system_health():
+    """測試系統健康狀態"""
+    print("\n🏥 系統健康檢查")
+    print("="*30)
+    
+    services = [
+        {"name": "XAI Wrapper", "url": "http://localhost:8009/health"},
+        {"name": "Chatbot API", "url": "http://localhost:8008/health"},
+        {"name": "LINE Bot", "url": "http://localhost:8081/health"}
+    ]
+    
+    for service in services:
+        try:
+            start_time = time.time()
+            response = requests.get(service["url"], timeout=3)
+            response_time = time.time() - start_time
+            
+            if response.status_code == 200:
+                print(f"✅ {service['name']}: 正常 ({response_time:.2f}s)")
+            else:
+                print(f"⚠️  {service['name']}: 異常 (狀態碼: {response.status_code})")
+                
+        except Exception as e:
+            print(f"❌ {service['name']}: 無法連接 ({e})")
 
-        for chunk in demo_chunks:
-            # 生成嵌入向量
-            content = f"{chunk['title']} {chunk['content']} {' '.join(chunk['keywords'])}"
-            embedding = model.encode(content).tolist()
-
-            # 准备向量数据
-            vector_data = {
-                'id': chunk['chunk_id'],
-                'values': embedding,
-                'metadata': {
-                    'title': chunk['title'],
-                    'content': chunk['content'][:500],  # 限制长度
-                    'chunk_type': chunk['chunk_type'],
-                    'keywords': json.dumps(chunk['keywords'])
-                }
-            }
-
-            vectors_to_upload.append(vector_data)
-            print(f"✅ Prepared: {chunk['chunk_id']}")
-
-        # 批量上传
-        upsert_response = index.upsert(vectors=vectors_to_upload)
-        print(f"🎉 Successfully uploaded {upsert_response.upserted_count} demo vectors!")
-
-        # 等待索引更新
-        time.sleep(3)
-
-        # 测试查询
-        print("🔍 Testing demo query...")
-        test_query = "失智症的症状有哪些？"
-        query_embedding = model.encode(test_query).tolist()
-
-        results = index.query(
-            vector=query_embedding,
-            top_k=3,
-            include_metadata=True
-        )
-
-        print(f"✅ Query results for '{test_query}':")
-        for i, match in enumerate(results.matches, 1):
-            print(f"  {i}. {match.metadata['title']} (Score: {match.score:.4f})")
-            print(f"     {match.metadata['content'][:100]}...")
-
-        return True
-
-    except Exception as e:
-        print(f"❌ Failed to upload demo knowledge: {str(e)}")
-        return False
+def test_visualization_stages():
+    """測試不同視覺化階段"""
+    print("\n🎨 視覺化階段測試")
+    print("="*30)
+    
+    test_input = "爸爸忘記關瓦斯爐"
+    stages = ["immediate", "quick", "detailed"]
+    
+    for stage in stages:
+        print(f"\n🔄 測試 {stage.upper()} 階段...", end=" ")
+        start_time = time.time()
+        
+        try:
+            response = requests.post(
+                "http://localhost:8009/analyze",
+                json={
+                    "user_input": test_input,
+                    "user_id": "test_user",
+                    "stage": stage
+                },
+                timeout=10
+            )
+            
+            response_time = time.time() - start_time
+            response.raise_for_status()
+            
+            data = response.json()
+            xai_data = data.get("xai_enhanced", {})
+            
+            module = xai_data.get("module", "unknown")
+            confidence = xai_data.get("confidence", 0.0)
+            
+            print(f"✅ ({response_time:.2f}s)")
+            print(f"   模組: {module}")
+            print(f"   信心度: {confidence:.1%}")
+            
+        except Exception as e:
+            print(f"❌ 錯誤: {e}")
 
 def main():
-    """主测试函数"""
-    print("🚀 Starting Pinecone Quick Test")
-    print("=" * 50)
-
-    # 1. 测试连接
-    if not test_pinecone_connection():
-        return
-
-    # 2. 创建索引
-    index = create_index_if_not_exists()
-    if not index:
-        return
-
-    # 3. 测试基本操作
-    if not test_basic_operations(index):
-        return
-
-    # 4. 上传演示知识
-    if not upload_demo_knowledge(index):
-        print("⚠️ Demo knowledge upload failed, but basic operations work")
-
-    print("\n🎉 All tests completed successfully!")
-    print(f"✅ Your Pinecone index '{INDEX_NAME}' is ready to use!")
-    print("\nNext steps:")
-    print("1. Install dependencies: pip install sentence-transformers fastapi line-bot-sdk")
-    print("2. Set up your LINE Bot credentials")
-    print("3. Run the main application: python main.py")
+    """主函數"""
+    print("🚀 XAI 系統快速測試")
+    print("="*50)
+    
+    # 系統健康檢查
+    test_system_health()
+    
+    # 快速功能測試
+    results = quick_test_xai_system()
+    
+    # 視覺化階段測試
+    test_visualization_stages()
+    
+    # 保存結果
+    timestamp = time.strftime("%Y%m%d_%H%M%S")
+    filename = f"quick_test_results_{timestamp}.json"
+    
+    with open(filename, "w", encoding="utf-8") as f:
+        json.dump(results, f, indent=2, ensure_ascii=False)
+    
+    print(f"\n💾 測試結果已保存至: {filename}")
+    print("\n✅ 快速測試完成！")
 
 if __name__ == "__main__":
     main()
-
----
-
-# requirements_minimal.txt - 最小依赖版本
-pinecone-client==3.0.0
-sentence-transformers==2.2.2
-fastapi==0.104.1
-uvicorn==0.24.0
-line-bot-sdk==3.8.0
-pydantic==2.5.0
-python-multipart==0.0.6
-
----
-
-# replit_secrets_setup.md
-# 在 Replit 中设置这些 Secrets:
-
-PINECONE_API_KEY=pcsk_4WvWXx_G5bRUFdFNzLzRHNM9rkvFMvC18TMRTaeYXVCxmWSPQLmKr4xAs4UaZg5NvVb69m
-PINECONE_INDEX_NAME=dementia-care-knowledge
-LINE_CHANNEL_ACCESS_TOKEN=your_line_token_here
-LINE_CHANNEL_SECRET=your_line_secret_here
-
-# 快速部署命令:
-# 1. 运行测试: python quick_test.py
-# 2. 如果测试通过，安装完整依赖: pip install -r requirements_minimal.txt  
-# 3. 运行主应用: python main.py
-
----
-
-# simple_main.py - 简化版主应用（用于快速测试）
-from fastapi import FastAPI
-from pinecone import Pinecone
-import json
-
-app = FastAPI()
-
-# 初始化 Pinecone
-pc = Pinecone(api_key="pcsk_4WvWXx_G5bRUFdFNzLzRHNM9rkvFMvC18TMRTaeYXVCxmWSPQLmKr4xAs4UaZg5NvVb69m")
-index = pc.Index("dementia-care-knowledge")
-
-@app.get("/")
-async def root():
-    """根路径 - 显示状态"""
-    try:
-        stats = index.describe_index_stats()
-        return {
-            "message": "🎉 XAI Dementia Care Bot is running!",
-            "status": "healthy",
-            "pinecone_vectors": stats.total_vector_count,
-            "index_name": "dementia-care-knowledge"
-        }
-    except Exception as e:
-        return {
-            "message": "⚠️ Service running but Pinecone connection issues",
-            "error": str(e)
-        }
-
-@app.get("/test-query")
-async def test_query(q: str = "失智症症状"):
-    """测试查询功能"""
-    try:
-        # 简单的文本查询（不使用嵌入模型）
-        # 在实际应用中会使用 sentence-transformers
-
-        # 模拟查询结果
-        return {
-            "query": q,
-            "message": "✅ Query endpoint working",
-            "note": "Install sentence-transformers for full functionality"
-        }
-    except Exception as e:
-        return {"error": str(e)}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
----
-
-# 完整部署检查清单:
-
-# ✅ 第一步: 测试 Pinecone 连接
-# python quick_test.py
-
-# ✅ 第二步: 安装必要依赖  
-# pip install sentence-transformers fastapi uvicorn line-bot-sdk
-
-# ✅ 第三步: 测试简化应用
-# python simple_main.py
-
-# ✅ 第四步: 设置 LINE Bot credentials
-# 在 Replit Secrets 中添加 LINE_CHANNEL_ACCESS_TOKEN 和 LINE_CHANNEL_SECRET
-
-# ✅ 第五步: 运行完整应用
-# python main.py (使用之前提供的完整代码)

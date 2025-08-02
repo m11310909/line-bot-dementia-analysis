@@ -359,7 +359,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "enhanced_m1_m2_m3_m4_integrated_api:app",
         host="0.0.0.0",
-        port=8006,
+        port=8005,
         reload=True,
         log_level="info"
     ) 

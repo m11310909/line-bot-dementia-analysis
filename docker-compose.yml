@@ -1,0 +1,106 @@
+version: '3.8'
+
+services:
+  # LINE Bot Webhook Service
+  line-bot:
+    build: ./services/line-bot
+    ports:
+      - "8081:8081"
+    environment:
+      - LINE_CHANNEL_ACCESS_TOKEN=${LINE_CHANNEL_ACCESS_TOKEN}
+      - LINE_CHANNEL_SECRET=${LINE_CHANNEL_SECRET}
+      - XAI_API_URL=http://xai-analysis:8005
+      - RAG_API_URL=http://rag-service:8006
+      - EXTERNAL_URL=${EXTERNAL_URL:-http://localhost:8081}
+    depends_on:
+      - xai-analysis
+      - rag-service
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  # XAI Analysis Service
+  xai-analysis:
+    build: ./services/xai-analysis
+    ports:
+      - "8005:8005"
+    environment:
+      - MODULES_PATH=/app/shared/modules
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./shared/modules:/app/shared/modules
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  # RAG Service
+  rag-service:
+    build: ./services/rag-service
+    ports:
+      - "8006:8006"
+    environment:
+      - VECTOR_DB_PATH=/app/data/vector_index
+      - KNOWLEDGE_BASE_PATH=/app/data/knowledge
+      - LOG_LEVEL=INFO
+    volumes:
+      - ./data:/app/data
+      - ./logs:/app/logs
+    restart: unless-stopped
+
+  # LIFF Frontend Service
+  liff-frontend:
+    build: ./services/liff-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8005
+      - REACT_APP_LIFF_ID=${LIFF_ID}
+    depends_on:
+      - xai-analysis
+    restart: unless-stopped
+
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=dementia_analysis
+      - POSTGRES_USER=admin
+      - POSTGRES_PASSWORD=secure_password
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    restart: unless-stopped
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+
+  # Nginx Reverse Proxy
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+    depends_on:
+      - line-bot
+      - xai-analysis
+      - rag-service
+      - liff-frontend
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  default:
+    driver: bridge 

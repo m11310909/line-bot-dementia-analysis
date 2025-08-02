@@ -1,215 +1,311 @@
-LINE Bot Dementia Warning Analysis System
-完整的失智症早期警訊分析系統，使用 Google Gemini AI 和 LINE Bot 為家庭照顧者提供專業的行為評估服務。
+# 🚀 Dockerized LINE Bot Dementia Analysis System - Phase 2 Enhanced
 
-🏗️ 系統架構
-使用者訊息 → LINE Bot → Webhook (8002) → M1 Flex API (8001) → Google Gemini → 分析結果
-     ↑                                                                      ↓
-LINE App ←─── Flex Message ←─── JSON 回應 ←─── AI 分析 ←──────────────────────┘
-📦 檔案結構
-line-bot-dementia-analysis/
-├── requirements.txt           # Python 套件需求
-├── .env.template             # 環境變數範本
-├── setup.py                  # 安裝腳本
-├── m1_flex_api.py           # Google Gemini 分析服務 (Port 8001)
-├── line_bot_webhook.py      # LINE Bot 整合服務 (Port 8002)
-├── start_flex.bat/.sh       # M1 Flex API 啟動腳本
-├── start_webhook.bat/.sh    # Webhook 啟動腳本
-└── README.md                # 說明文件
-🚀 快速開始
+## 🎯 **系統概述**
+這是一個基於微服務架構的失智症照護 LINE Bot 系統，採用 Docker 容器化部署，支援 GPU 加速、XAI 視覺化、非線性導航和 ngrok 外部訪問，提供完整的智能分析和知識檢索功能。
 
-# LINE Bot Dementia Analysis 專案
+## 🏗️ **系統架構**
 
-此專案為一個結合 RAG 與 XAI 的 LINE Bot，用於協助失智症照護者快速檢索與解讀照護資訊，並以視覺化 Flex Message 提升互動體驗。
+```
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   LINE Bot      │    │  XAI Analysis   │    │   RAG Service   │
+│   (Port 8081)   │◄──►│   (Port 8005)   │◄──►│   (Port 8006)   │
+│   Non-linear    │    │   Enhanced      │    │   GPU Acceler.  │
+│   Navigation    │    │   Visualization  │    │   Vector Search │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+         │                       │                       │
+         ▼                       ▼                       ▼
+┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
+│   PostgreSQL    │    │     Redis       │    │   ngrok Tunnel  │
+│   (Port 5432)   │    │   (Port 6379)   │    │   (External)    │
+└─────────────────┘    └─────────────────┘    └─────────────────┘
+```
 
-## 專案結構
-─ api/                   # 後端服務程式碼
-│  ├─ core/               # 共用函式與客戶端
-│  ├─ modules/            # 各 XAI 模組分析程式
-│  └─ main.py             # FastAPI 啟動檔
-├─ flex-component-system/ # 前端與 Flex JSON 模板
-│  ├─ backend/            # Flex Message 產生腳本
-│  └─ frontend/           # React 客戶端程式
-├─ data/                  # 靜態資料與向量索引
-├─ config/                # 環境設定與 secrets 管理
-├─ tests/                 # 整合與單元測試
-├─ deploy.sh              # 部署到 Replit 的腳本
-├─ README.md              # 本檔案
-└─ .gitignore             # Git 忽略清單
+## 🚀 **快速開始**
 
-1. 安裝與設定
-bash
-# 1. 執行安裝腳本
-python setup.py
+### **前置需求**
+- Docker 28.3.2+
+- Docker Compose
+- NVIDIA GPU (可選，用於 GPU 加速)
+- ngrok (用於外部訪問)
+- LINE Bot 憑證
 
-# 2. 設定環境變數
-cp .env.template .env
-# 編輯 .env 檔案，填入你的 API 金鑰
-2. 設定環境變數
-編輯 .env 檔案：
+### **Step 1: 克隆專案**
+```bash
+git clone <repository-url>
+cd line-bot-dementia-analysis
+```
 
-bash
-# LINE Bot 憑證
-LINE_CHANNEL_ACCESS_TOKEN=你的_LINE_頻道_存取_權杖
-LINE_CHANNEL_SECRET=你的_LINE_頻道_密鑰
+### **Step 2: 設置環境變數**
+```bash
+cp env.example .env
+# 編輯 .env 文件，填入您的 LINE Bot 憑證
+```
 
-# Google AI Studio API 金鑰  
-AISTUDIO_API_KEY=你的_Google_AI_Studio_API_金鑰
+### **Step 3: 部署系統**
+```bash
+chmod +x deploy.sh
+./deploy.sh
+```
 
-# 可選：API 端點
-FLEX_API_URL=http://localhost:8001/m1-flex
-如何取得 API 金鑰：
-LINE Bot 憑證: LINE Developers Console
-Google AI Studio API: AI Studio
-3. 啟動服務（3 個終端）
-方法 A：使用啟動腳本
-Windows:
+### **Step 4: 設置 ngrok (可選)**
+```bash
+chmod +x ngrok-setup.sh
+./ngrok-setup.sh
+```
 
-bash
-# 終端 1: M1 Flex API
-start_flex.bat
+### **Step 5: 更新 LINE Developer Console**
+1. 前往 [LINE Developer Console](https://developers.line.biz/)
+2. 設置 Webhook URL: `https://your-ngrok-url.ngrok-free.app/webhook`
+3. 啟用 Webhook
 
-# 終端 2: LINE Bot Webhook  
-start_webhook.bat
-Unix/Mac:
+### **Step 6: 測試系統**
+```bash
+python test_phase2_features.py
+```
 
-bash
-# 終端 1: M1 Flex API
-./start_flex.sh
+## 🎯 **Phase 2 增強功能**
 
-# 終端 2: LINE Bot Webhook
-./start_webhook.sh
-方法 B：手動啟動
-bash
-# 終端 1: M1 Flex API (Google Gemini 分析)
-python m1_flex_api.py
+### **🚀 GPU 加速 RAG 系統**
+- **FAISS GPU 向量搜尋**: 支援 GPU 加速的相似度搜尋
+- **Sentence Transformers**: 多語言模型支援
+- **自動降級**: GPU 不可用時自動使用 CPU
+- **效能監控**: 即時處理時間和 GPU 使用率監控
 
-# 終端 2: LINE Bot Webhook (LINE 整合)
-python line_bot_webhook.py
+### **📊 XAI 視覺化增強**
+- **可解釋性路徑**: 詳細的決策過程說明
+- **信心度雷達圖**: 各模組分析結果視覺化
+- **特徵重要性**: 關鍵詞和症狀權重分析
+- **模組使用統計**: 各模組使用頻率追蹤
 
-# 終端 3: Ngrok 隧道 (讓 LINE 可以連到你的服務)
-ngrok http 8002
-4. 設定 LINE Bot Webhook
-啟動 ngrok 後，複製 https URL（例如：https://abc123.ngrok.io）
-到 LINE Developers Console
-選擇你的 Bot → Messaging API
-設定 Webhook URL: https://abc123.ngrok.io/webhook
-啟用 "Use webhook"
-點擊 "Verify" 確認連線成功
-🧪 測試系統
-1. 檢查服務狀態
-bash
-# 測試 M1 Flex API
-curl http://localhost:8001/health
+### **🧭 四大模組非線性導航**
+- **智能意圖檢測**: 自動識別用戶需求
+- **動態模組推薦**: 基於上下文推薦相關模組
+- **一鍵模組切換**: 無需重新輸入即可切換分析模組
+- **個人化體驗**: 記住用戶偏好和歷史
 
-# 測試 LINE Bot Webhook
-curl http://localhost:8002/health
-2. 測試分析功能
-bash
-# 直接測試 Gemini 分析
-curl -X POST http://localhost:8001/m1-flex \
+### **💬 進階 Flex Message**
+- **豐富視覺設計**: 彩色模組標識和圖標
+- **互動按鈕**: 一鍵深入分析和知識檢索
+- **動態內容**: 根據分析結果動態生成內容
+- **錯誤處理**: 優雅的錯誤提示和恢復
+
+## 📡 **服務端點**
+
+### **LINE Bot Service (Port 8081)**
+- `GET /` - 服務狀態
+- `GET /health` - 健康檢查
+- `POST /webhook` - LINE Bot webhook
+- `GET /webhook-url` - 獲取 webhook URL
+
+### **XAI Analysis Service (Port 8005)**
+- `GET /` - 服務狀態
+- `GET /health` - 健康檢查
+- `POST /comprehensive-analysis` - 綜合分析
+- `POST /analyze/{module}` - 單模組分析
+- `GET /xai-features` - XAI 功能列表
+- `GET /modules` - 模組列表
+
+### **RAG Service (Port 8006)**
+- `GET /` - 服務狀態
+- `GET /health` - 健康檢查
+- `POST /search` - GPU 加速知識搜尋
+- `GET /gpu-status` - GPU 狀態檢查
+- `GET /domains` - 知識領域列表
+- `GET /knowledge/{domain}` - 特定領域知識
+
+## 🌐 **ngrok 配置**
+
+### **自動設置**
+```bash
+./ngrok-setup.sh
+```
+
+### **手動設置**
+1. 啟動 ngrok: `ngrok http 8081`
+2. 獲取 URL: `curl http://localhost:4040/api/tunnels`
+3. 更新 .env: `EXTERNAL_URL=https://your-url.ngrok-free.app`
+
+### **URL 檢索**
+```bash
+# 獲取當前 webhook URL
+curl http://localhost:8081/webhook-url
+
+# 檢查 ngrok 狀態
+curl http://localhost:4040/api/tunnels
+```
+
+## 🛠️ **管理命令**
+
+### **服務管理**
+```bash
+# 啟動所有服務
+docker-compose up -d
+
+# 查看服務狀態
+docker-compose ps
+
+# 重啟特定服務
+docker-compose restart line-bot
+
+# 停止所有服務
+docker-compose down
+
+# 查看日誌
+docker-compose logs -f [service-name]
+```
+
+### **功能測試**
+```bash
+# 測試 Phase 2 功能
+python test_phase2_features.py
+
+# 測試 GPU 加速
+curl http://localhost:8006/gpu-status
+
+# 測試 XAI 功能
+curl http://localhost:8005/xai-features
+
+# 測試知識搜尋
+curl -X POST http://localhost:8006/search \
   -H "Content-Type: application/json" \
-  -d '{"user_input": "媽媽最近常重複問同樣的問題"}'
-3. 測試 LINE Bot
-掃描 LINE Developers Console 中的 QR Code 加 Bot 為好友
-發送訊息測試：
-help - 顯示使用說明
-媽媽最近常忘記關瓦斯 - 分析失智症警訊
-爸爸重複問同樣問題 - 另一個測試範例
-🔧 系統功能
-失智症十大警訊分析
-系統可以分析以下 10 種早期警訊：
+  -d '{"query": "失智症早期症狀", "use_gpu": true}'
+```
 
-M1-01: 記憶力減退影響生活
-M1-02: 計劃事情或解決問題有困難
-M1-03: 無法勝任原本熟悉的事務
-M1-04: 對時間地點感到混淆
-M1-05: 有困難理解視覺影像和空間關係
-M1-06: 言語表達或書寫出現困難
-M1-07: 東西擺放錯亂且失去回頭尋找的能力
-M1-08: 判斷力變差或減弱
-M1-09: 從工作或社交活動中退出
-M1-10: 情緒和個性的改變
-Flex Message 回應格式
-每個分析結果包含：
+## 🔧 **故障排除**
 
-🔸 使用者描述: 總結使用者的輸入
-✅ 正常老化: 對應的正常老化現象
-⚠️ 失智警訊: 需要注意的失智症徵象
-🔁 建議行動: 具體的後續建議
-🔗 更多資訊: 連結到專業資源
-🛠️ 故障排除
-常見問題
-1. "Missing AISTUDIO_API_KEY"
-解決方法: 到 Google AI Studio 申請 API 金鑰並設定到環境變數
+### **常見問題**
+1. **GPU 不可用**: 系統會自動降級到 CPU 模式
+2. **ngrok URL 變更**: 使用 `./ngrok-setup.sh` 自動更新
+3. **服務啟動失敗**: 檢查 Docker 和端口衝突
+4. **LINE Bot 無回應**: 檢查 webhook URL 和憑證
 
-2. "Missing LINE Bot credentials"
-解決方法: 到 LINE Developers 建立 Bot 並取得憑證
+### **日誌查看**
+```bash
+# 查看所有日誌
+docker-compose logs -f
 
-3. "Cannot connect to Flex API"
-檢查:
+# 查看特定服務日誌
+docker-compose logs -f line-bot
+docker-compose logs -f xai-analysis
+docker-compose logs -f rag-service
+```
 
-M1 Flex API 是否在 port 8001 運行
-防火牆是否阻擋 localhost:8001
-查看 M1 Flex API 終端的錯誤訊息
-4. "Invalid LINE signature"
-檢查:
+### **健康檢查**
+```bash
+# 檢查所有服務健康狀態
+curl http://localhost:8081/health
+curl http://localhost:8005/health
+curl http://localhost:8006/health
+```
 
-LINE_CHANNEL_SECRET 是否正確設定
-Webhook URL 是否為 https://your-ngrok.ngrok.io/webhook
-確保使用 https（不是 http）的 ngrok URL
-5. Bot 沒有回應
-除錯步驟:
+## 📊 **監控與運維**
 
-檢查三個終端都有在運行
-個別測試每個組件
-確認 ngrok 隧道還在運作
-驗證 LINE Bot webhook 設定
-記錄檔分析
-尋找這些記錄訊息：
+### **效能監控**
+- **GPU 使用率**: `curl http://localhost:8006/gpu-status`
+- **處理時間**: 各 API 回應包含處理時間
+- **服務狀態**: 健康檢查端點提供詳細狀態
 
-✅ Google AI configured - Gemini 設定成功
-✅ LINE Bot API initialized - LINE Bot 設定成功
-📨 Webhook request received - LINE 正在呼叫你的 webhook
-✅ Webhook processed successfully - 訊息處理成功
-❌ Invalid LINE signature - 檢查你的頻道密鑰
-🔍 開發與除錯
-API 端點
-M1 Flex API (Port 8001):
+### **日誌管理**
+- **集中化日誌**: 所有服務日誌統一管理
+- **錯誤追蹤**: 詳細的錯誤訊息和堆疊追蹤
+- **效能分析**: 處理時間和資源使用統計
 
-POST /m1-flex - 主要分析端點
-GET /health - 健康檢查
-GET /docs - API 文件
-POST /test - 測試端點
-LINE Bot Webhook (Port 8002):
+## 🔄 **升級指南**
 
-POST /webhook - LINE webhook 端點
-GET /health - 健康檢查
-GET /info - Bot 資訊
-POST /test-webhook - 測試端點
-手動測試 Webhook
-bash
-# 測試 webhook（替換為你的 ngrok URL）
-curl -X POST https://your-ngrok-url.ngrok.io/webhook \
-  -H "Content-Type: application/json" \
-  -H "X-Line-Signature: test" \
-  -d '{"events":[]}'
-📈 擴充功能
-系統設計為模組化，可以輕鬆擴充：
+### **從 Phase 1 升級到 Phase 2**
+1. 備份現有配置: `cp .env .env.backup`
+2. 更新代碼: `git pull origin main`
+3. 重新部署: `./deploy.sh`
+4. 測試功能: `python test_phase2_features.py`
 
-多語言支援: 加入英文、日文等語言分析
-更多評估模組: 擴充到 M2-M9 其他評估類型
-資料庫整合: 儲存使用者互動記錄
-進階分析: 加入趨勢分析和個人化建議
-網頁介面: 建立管理後台
-📄 授權
-此專案僅供教育和研究用途。請諮詢專業醫師進行正式的失智症評估。
+### **功能對比**
+| 功能 | Phase 1 | Phase 2 |
+|------|---------|---------|
+| GPU 加速 | ❌ | ✅ |
+| XAI 視覺化 | 基礎 | 增強 |
+| 非線性導航 | ❌ | ✅ |
+| Flex Message | 基礎 | 進階 |
+| 效能監控 | 基礎 | 詳細 |
 
-🆘 支援
-如果遇到問題：
+## 🛠️ **開發指南**
 
-檢查 故障排除 章節
-查看終端的錯誤訊息
-確認所有環境變數都正確設定
-驗證 API 金鑰是否有效
-⚠️ 重要提醒: 此系統僅供參考，不可取代專業醫療診斷。如有疑慮請諮詢神經內科或記憶門診專業醫師。
+### **本地開發**
+```bash
+# 克隆專案
+git clone <repository-url>
+cd line-bot-dementia-analysis
+
+# 設置開發環境
+python -m venv venv
+source venv/bin/activate  # Linux/Mac
+# 或 venv\Scripts\activate  # Windows
+
+# 安裝依賴
+pip install -r requirements.txt
+
+# 啟動開發服務
+python services/line-bot/main.py
+python services/xai-analysis/main.py
+python services/rag-service/main.py
+```
+
+### **API 開發**
+- 使用 FastAPI 框架
+- 支援 OpenAPI 文檔
+- 自動生成 API 文檔: `http://localhost:8005/docs`
+
+### **測試開發**
+```bash
+# 運行測試
+python test_phase2_features.py
+
+# 自定義測試
+python -c "
+import requests
+response = requests.get('http://localhost:8005/health')
+print(response.json())
+"
+```
+
+## 🎯 **功能特色**
+
+### **智能分析**
+- **四大模組**: M1-M4 完整分析流程
+- **XAI 可解釋性**: 詳細的決策過程說明
+- **GPU 加速**: 高效能向量搜尋
+- **多語言支援**: 中文和英文分析
+
+### **用戶體驗**
+- **非線性導航**: 智能模組推薦和切換
+- **豐富視覺**: 彩色 Flex Message 設計
+- **即時回應**: 優化的處理速度
+- **錯誤恢復**: 優雅的錯誤處理
+
+### **系統穩定性**
+- **微服務架構**: 服務獨立，易於擴展
+- **自動重啟**: 服務故障自動恢復
+- **健康監控**: 即時狀態檢查
+- **日誌管理**: 完整的錯誤追蹤
+
+### **開發友好**
+- **Docker 容器化**: 環境一致，部署簡單
+- **API 文檔**: 自動生成的 OpenAPI 文檔
+- **測試工具**: 完整的測試套件
+- **監控工具**: 詳細的效能監控
+
+## 📞 **支援**
+
+### **技術支援**
+- **GitHub Issues**: 報告問題和功能請求
+- **文檔**: 詳細的 API 文檔和使用指南
+- **測試**: 完整的測試套件和範例
+
+### **社群**
+- **開發者社群**: 分享經驗和最佳實踐
+- **貢獻指南**: 歡迎提交 Pull Request
+- **更新日誌**: 詳細的功能更新記錄
+
+---
+
+**🎉 Phase 2 升級完成！享受增強的 GPU 加速、XAI 視覺化和非線性導航功能！**
 

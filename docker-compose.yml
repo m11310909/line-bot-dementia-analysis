@@ -1,7 +1,6 @@
 version: '3.8'
 
 services:
-  # LINE Bot Webhook Service
   line-bot:
     build: ./services/line-bot
     ports:
@@ -18,61 +17,72 @@ services:
     volumes:
       - ./logs:/app/logs
     restart: unless-stopped
+    networks:
+      - line-bot-network
 
-  # XAI Analysis Service
   xai-analysis:
     build: ./services/xai-analysis
     ports:
       - "8005:8005"
     environment:
-      - MODULES_PATH=/app/shared/modules
       - LOG_LEVEL=INFO
+      - DEBUG=false
     volumes:
-      - ./shared/modules:/app/shared/modules
-      - ./data:/app/data
       - ./logs:/app/logs
+      - ./shared:/app/shared
     restart: unless-stopped
+    networks:
+      - line-bot-network
 
-  # RAG Service
   rag-service:
     build: ./services/rag-service
     ports:
       - "8006:8006"
     environment:
-      - VECTOR_DB_PATH=/app/data/vector_index
-      - KNOWLEDGE_BASE_PATH=/app/data/knowledge
       - LOG_LEVEL=INFO
+      - DEBUG=false
+      - GPU_ENABLED=true
     volumes:
-      - ./data:/app/data
       - ./logs:/app/logs
+      - ./data:/app/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
     restart: unless-stopped
+    networks:
+      - line-bot-network
 
-  # LIFF Frontend Service
   liff-frontend:
     build: ./services/liff-frontend
     ports:
       - "3000:3000"
     environment:
-      - REACT_APP_API_URL=http://localhost:8005
+      - REACT_APP_API_URL=http://localhost:8081
       - REACT_APP_LIFF_ID=${LIFF_ID}
     depends_on:
-      - xai-analysis
+      - line-bot
     restart: unless-stopped
+    networks:
+      - line-bot-network
 
-  # PostgreSQL Database
   postgres:
     image: postgres:15
     environment:
-      - POSTGRES_DB=dementia_analysis
-      - POSTGRES_USER=admin
-      - POSTGRES_PASSWORD=secure_password
-    ports:
-      - "5432:5432"
+      - POSTGRES_DB=${POSTGRES_DB:-linebot_db}
+      - POSTGRES_USER=${POSTGRES_USER:-linebot_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-linebot_pass}
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
     restart: unless-stopped
+    networks:
+      - line-bot-network
 
-  # Redis Cache
   redis:
     image: redis:7-alpine
     ports:
@@ -80,27 +90,28 @@ services:
     volumes:
       - redis_data:/data
     restart: unless-stopped
+    networks:
+      - line-bot-network
 
-  # Nginx Reverse Proxy
   nginx:
     image: nginx:alpine
     ports:
       - "80:80"
       - "443:443"
     volumes:
-      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-      - ./nginx/ssl:/etc/nginx/ssl
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
     depends_on:
       - line-bot
-      - xai-analysis
-      - rag-service
       - liff-frontend
     restart: unless-stopped
+    networks:
+      - line-bot-network
 
 volumes:
   postgres_data:
   redis_data:
 
 networks:
-  default:
+  line-bot-network:
     driver: bridge 

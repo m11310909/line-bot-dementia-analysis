@@ -1118,6 +1118,136 @@ def analyze_comprehensive(text: str) -> Dict[str, Any]:
         "M4": m4_analysis
     }
 
+def should_use_visualization(message: str, user_context: dict = None) -> dict:
+    """
+    智能判斷是否使用視覺化模組
+    
+    Args:
+        message: 用戶輸入訊息
+        user_context: 用戶上下文（可選）
+    
+    Returns:
+        dict: {
+            "use_visualization": bool,
+            "reason": str,
+            "confidence": float
+        }
+    """
+    # 視覺化偏好關鍵詞
+    visualization_keywords = [
+        "圖表", "視覺", "圖像", "視覺化", "圖表", "分析", "數據", "統計",
+        "比較", "對比", "趨勢", "進度", "階段", "程度", "嚴重性",
+        "詳細", "完整", "全面", "深入", "專業", "醫療", "診斷"
+    ]
+    
+    # 純文字偏好關鍵詞
+    text_only_keywords = [
+        "簡單", "快速", "簡短", "直接", "立即", "馬上", "緊急",
+        "基本", "初步", "大概", "大概", "約略", "粗略",
+        "聊天", "閒聊", "隨便", "隨便問問", "好奇", "想了解"
+    ]
+    
+    # 緊急情況關鍵詞
+    emergency_keywords = [
+        "緊急", "危險", "立即", "馬上", "現在", "立刻", "急",
+        "救命", "幫助", "求助", "支援", "協助"
+    ]
+    
+    # 複雜分析關鍵詞
+    complex_analysis_keywords = [
+        "詳細分析", "完整評估", "全面檢查", "深入診斷",
+        "專業意見", "醫療建議", "專家諮詢", "正式評估"
+    ]
+    
+    message_lower = message.lower()
+    
+    # 計算各類關鍵詞匹配分數
+    viz_score = sum(1 for keyword in visualization_keywords if keyword in message_lower)
+    text_score = sum(1 for keyword in text_only_keywords if keyword in message_lower)
+    emergency_score = sum(1 for keyword in emergency_keywords if keyword in message_lower)
+    complex_score = sum(1 for keyword in complex_analysis_keywords if keyword in message_lower)
+    
+    # 判斷邏輯
+    use_visualization = False
+    reason = ""
+    confidence = 0.5
+    
+    # 緊急情況：純文字（快速回應）
+    if emergency_score > 0:
+        use_visualization = False
+        reason = "檢測到緊急關鍵詞，使用純文字快速回應"
+        confidence = 0.9
+    
+    # 複雜分析：視覺化
+    elif complex_score > 0:
+        use_visualization = True
+        reason = "檢測到複雜分析需求，使用視覺化模組"
+        confidence = 0.85
+    
+    # 明確的視覺化偏好
+    elif viz_score > text_score and viz_score > 0:
+        use_visualization = True
+        reason = f"檢測到 {viz_score} 個視覺化偏好關鍵詞"
+        confidence = 0.7 + (viz_score * 0.1)
+    
+    # 明確的純文字偏好
+    elif text_score > viz_score and text_score > 0:
+        use_visualization = False
+        reason = f"檢測到 {text_score} 個純文字偏好關鍵詞"
+        confidence = 0.7 + (text_score * 0.1)
+    
+    # 訊息長度判斷
+    elif len(message) > 50:
+        use_visualization = True
+        reason = "訊息較長，適合詳細視覺化分析"
+        confidence = 0.6
+    
+    # 預設：視覺化（提供完整體驗）
+    else:
+        use_visualization = True
+        reason = "預設使用視覺化模組提供完整體驗"
+        confidence = 0.5
+    
+    return {
+        "use_visualization": use_visualization,
+        "reason": reason,
+        "confidence": min(confidence, 0.95)
+    }
+
+def create_text_only_response(analysis_result: dict, module: str) -> dict:
+    """
+    創建純文字回應
+    
+    Args:
+        analysis_result: 分析結果
+        module: 使用的模組
+    
+    Returns:
+        dict: 純文字回應格式（符合 ChatbotResponse 模型）
+    """
+    chatbot_reply = analysis_result.get("chatbot_reply", "")
+    
+    # 根據模組添加不同的前綴
+    module_prefixes = {
+        "M1": "🚨 警訊分析：",
+        "M2": "📊 病程評估：", 
+        "M3": "🧠 症狀分析：",
+        "M4": "🏥 照護建議："
+    }
+    
+    prefix = module_prefixes.get(module, "💬 失智小幫手：")
+    full_text = f"{prefix}{chatbot_reply}"
+    
+    # 創建符合 ChatbotResponse 模型的回應
+    return {
+        "type": "text",
+        "altText": "失智小幫手文字回應",
+        "contents": {
+            "type": "text",
+            "text": full_text
+        }
+    }
+
 @app.get("/")
 async def root():
     """API 根端點"""
@@ -1158,11 +1288,15 @@ async def health_check():
 
 @app.post("/analyze")
 async def analyze_message(request: ChatbotRequest) -> ChatbotResponse:
-    """智能分析訊息並自動選擇最適合的模組"""
+    """智能分析訊息並自動選擇最適合的模組，智能判斷是否使用視覺化"""
     try:
         message = request.message.strip()
         if not message:
             raise HTTPException(status_code=400, detail="訊息不能為空")
+        
+        # 智能判斷是否使用視覺化
+        viz_decision = should_use_visualization(message)
+        print(f"視覺化判斷: {viz_decision}")
         
         # 計算各模組的匹配分數
         module_scores = {}
@@ -1171,41 +1305,80 @@ async def analyze_message(request: ChatbotRequest) -> ChatbotResponse:
         m1_analysis = analyze_m1_warning_signs(message)
         module_scores["M1"] = len(m1_analysis["detected_signs"]) / 5.0  # 標準化分數
         
-        # M2 病程階段分數
+        # M2 病程階段分數 - 降低權重，避免過度匹配
         m2_analysis = analyze_m2_progression(message)
-        stage_weights = {"輕度": 0.3, "中度": 0.6, "重度": 0.9}
-        module_scores["M2"] = stage_weights.get(m2_analysis["detected_stage"], 0.3)
+        stage_weights = {"輕度": 0.2, "中度": 0.4, "重度": 0.6}  # 降低權重
+        module_scores["M2"] = stage_weights.get(m2_analysis["detected_stage"], 0.1)
         
-        # M3 BPSD 症狀分數
+        # M3 BPSD 症狀分數 - 提高權重和檢測精度
         m3_analysis = analyze_m3_bpsd(message)
-        module_scores["M3"] = len(m3_analysis["detected_symptoms"]) / 5.0
+        m3_score = len(m3_analysis["detected_symptoms"]) / 5.0
+        # 如果檢測到 BPSD 症狀，大幅提高分數
+        if m3_analysis["detected_symptoms"]:
+            m3_score += 0.4  # 額外加分
+        module_scores["M3"] = m3_score
         
         # M4 照護需求分數 - 提高權重
         m4_analysis = analyze_m4_care_needs(message)
-        module_scores["M4"] = len(m4_analysis["detected_needs"]) / 3.0  # 提高 M4 權重
-        
+        m4_score = len(m4_analysis["detected_needs"]) / 3.0
         # 特殊處理：如果明確提到醫療、照護等關鍵詞，優先選擇 M4
-        care_keywords = ["醫療", "醫生", "醫院", "治療", "照護", "照顧", "協助", "幫助", "支持", "資源", "服務"]
+        care_keywords = ["醫療", "醫生", "醫院", "治療", "照護", "照顧", "協助", "幫助", "支持", "資源", "服務", "需要"]
         if any(keyword in message for keyword in care_keywords):
-            module_scores["M4"] += 0.5  # 額外加分
+            m4_score += 0.6  # 大幅加分
+        module_scores["M4"] = m4_score
+        
+        # 特殊規則：BPSD 症狀優先於病程階段
+        bpsd_keywords = ["妄想", "幻覺", "憂鬱", "焦慮", "易怒", "攻擊", "激動", "暴躁", "生氣", "懷疑", "被害"]
+        if any(keyword in message for keyword in bpsd_keywords):
+            module_scores["M3"] += 0.5  # 大幅提高 M3 分數
+            module_scores["M2"] *= 0.3  # 大幅降低 M2 分數
+        
+        # 特殊規則：警訊症狀優先於病程階段
+        warning_keywords = ["忘記", "記憶", "記不住", "想不起", "重複問", "不會用", "忘記關", "操作", "使用", "功能", "迷路", "找不到"]
+        if any(keyword in message for keyword in warning_keywords):
+            module_scores["M1"] += 0.3  # 提高 M1 分數
+            module_scores["M2"] *= 0.5  # 降低 M2 分數
         
         # 選擇分數最高的模組
         selected_module = max(module_scores, key=module_scores.get)
         
-        # 根據選擇的模組創建回應
-        if selected_module == "M1":
-            flex_message = create_enhanced_m1_flex_message(m1_analysis, message)
-        elif selected_module == "M2":
-            flex_message = create_enhanced_m2_flex_message(m2_analysis, message)
-        elif selected_module == "M3":
-            flex_message = create_enhanced_m3_flex_message(m3_analysis, message)
-        elif selected_module == "M4":
-            flex_message = create_enhanced_m4_flex_message(m4_analysis, message)
-        else:
-            # 預設使用 M1
-            flex_message = create_enhanced_m1_flex_message(m1_analysis, message)
+        # 記錄模組選擇過程（用於調試）
+        print(f"模組分數: {module_scores}")
+        print(f"選擇模組: {selected_module}")
         
-        return ChatbotResponse(**flex_message)
+        # 根據視覺化判斷決定回應格式
+        if viz_decision["use_visualization"]:
+            # 使用視覺化模組
+            if selected_module == "M1":
+                response = create_enhanced_m1_flex_message(m1_analysis, message)
+            elif selected_module == "M2":
+                response = create_enhanced_m2_flex_message(m2_analysis, message)
+            elif selected_module == "M3":
+                response = create_enhanced_m3_flex_message(m3_analysis, message)
+            elif selected_module == "M4":
+                response = create_enhanced_m4_flex_message(m4_analysis, message)
+            else:
+                response = create_enhanced_m1_flex_message(m1_analysis, message)
+                selected_module = "M1"
+        else:
+            # 使用純文字回應
+            if selected_module == "M1":
+                analysis_result = m1_analysis
+            elif selected_module == "M2":
+                analysis_result = m2_analysis
+            elif selected_module == "M3":
+                analysis_result = m3_analysis
+            elif selected_module == "M4":
+                analysis_result = m4_analysis
+            else:
+                analysis_result = m1_analysis
+                selected_module = "M1"
+            
+            response = create_text_only_response(analysis_result, selected_module)
+        
+        print(f"模組選擇: {selected_module}, 視覺化: {viz_decision['use_visualization']}, 原因: {viz_decision['reason']}")
+        
+        return ChatbotResponse(**response)
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"分析失敗：{str(e)}")

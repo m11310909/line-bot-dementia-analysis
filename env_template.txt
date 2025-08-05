@@ -1,0 +1,13 @@
+# LINE Bot Configuration
+LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token_here
+LINE_CHANNEL_SECRET=your_line_channel_secret_here
+
+# Third-Party API Configuration
+API_TYPE=openai  # openai, gemini, custom
+API_KEY=your_api_key_here
+THIRD_PARTY_API_KEY=your_third_party_api_key_here
+GOOGLE_GEMINI_API_KEY=your_google_gemini_api_key_here
+
+# RAG API Configuration (if needed)
+RAG_API_URL=http://localhost:8005/analyze/M1
+RAG_HEALTH_URL=http://localhost:8005/health 

@@ -1,141 +1,274 @@
-# 第三方 API 失智症小幫手1 配置指南
+# 🔧 Third-Party API Integration Setup Guide
 
-## 🎯 概述
+## 📋 Overview
 
-本專案已更新為支援第三方 API 作為主要的對話回答引擎。系統會按以下優先順序選擇 API：
+This guide shows how to integrate third-party APIs directly with your LINE bot without visualization modules for testing purposes.
 
-1. **第三方 API 失智症小幫手1** (優先)
-2. 內部 Chatbot API (備用)
-3. RAG API (最後備用)
+## 🚀 Quick Start
 
-## ⚠️ 重要提醒
+### 1. **Environment Setup**
 
-### ChatGPT GPT 配置問題
-如果您要使用 ChatGPT 的 GPT 作為第三方 API，需要：
-
-1. **使用 OpenAI API**：不能直接調用 ChatGPT 網頁界面
-2. **正確的 API 端點**：需要使用 OpenAI 的官方 API
-3. **API Key**：需要有效的 OpenAI API Key
-
-## ⚙️ 配置步驟
-
-### 1. 環境變數設定
-
-在 `.env` 文件中添加以下配置：
+Add these variables to your `.env` file:
 
 ```bash
-# 第三方 API 失智症小幫手1 配置 (主要對話引擎)
-# 選項 A: OpenAI API (推薦)
-THIRD_PARTY_API_URL=https://api.openai.com/v1/chat/completions
-THIRD_PARTY_API_KEY=your_openai_api_key_here
-USE_THIRD_PARTY_API=true
-THIRD_PARTY_API_NAME=OpenAI ChatGPT
+# LINE Bot Configuration
+LINE_CHANNEL_ACCESS_TOKEN=your_line_channel_access_token
+LINE_CHANNEL_SECRET=your_line_channel_secret
 
-# 選項 B: 其他第三方 API
-# THIRD_PARTY_API_URL=https://your-api-endpoint.com/chat
-# THIRD_PARTY_API_KEY=your_api_key_here
-# USE_THIRD_PARTY_API=true
-# THIRD_PARTY_API_NAME=您的API名稱
-
-# 內部 API 配置 (備用)
-CHATBOT_API_URL=http://localhost:8008/analyze
-USE_CHATBOT_API=false
+# Third-Party API Configuration
+API_TYPE=openai  # openai, gemini, custom
+API_KEY=your_api_key_here
 ```
 
-### 2. OpenAI API 配置 (推薦)
+### 2. **Start the Webhook Server**
 
-如果您要使用 ChatGPT，請：
+```bash
+# Start the enhanced third-party API webhook
+python3 enhanced_third_party_api_webhook.py
+```
 
-1. **註冊 OpenAI 帳號**：https://platform.openai.com/
-2. **獲取 API Key**：在 OpenAI 平台生成 API Key
-3. **設定環境變數**：
-   ```bash
-   THIRD_PARTY_API_URL=https://api.openai.com/v1/chat/completions
-   THIRD_PARTY_API_KEY=sk-your-openai-api-key-here
+The server will run on `http://localhost:8082`
+
+### 3. **Test the Integration**
+
+```bash
+# Run the test script
+python3 test_third_party_api_integration.py
+```
+
+## 🔧 Supported APIs
+
+### **1. OpenAI API**
+
+**Configuration:**
+```bash
+API_TYPE=openai
+API_KEY=your_openai_api_key
+```
+
+**Features:**
+- GPT-3.5-turbo model
+- Traditional Chinese responses
+- 500 token limit
+- Temperature: 0.7
+
+### **2. Google Gemini API**
+
+**Configuration:**
+```bash
+API_TYPE=gemini
+API_KEY=your_gemini_api_key
+```
+
+**Features:**
+- Gemini Pro model
+- Traditional Chinese responses
+- 500 token limit
+- Temperature: 0.7
+
+### **3. Custom API**
+
+**Configuration:**
+```bash
+API_TYPE=custom
+API_KEY=your_custom_api_key
+```
+
+**Features:**
+- Custom endpoint support
+- Flexible response parsing
+- Configurable parameters
+
+## 📱 LINE Integration
+
+### **Webhook URL Setup**
+
+1. **Get your webhook URL:**
+   ```
+   http://localhost:8082/webhook
    ```
 
-### 3. API 回應格式要求
+2. **Update LINE Developer Console:**
+   - Go to LINE Developer Console
+   - Set webhook URL to your server
+   - Enable webhook
 
-第三方 API 需要支援以下格式之一：
+### **Message Flow**
 
-#### 格式 A: Flex Message (推薦)
+```
+User Message → LINE → Webhook → Third-Party API → Response → LINE → User
+```
+
+## 🧪 Testing
+
+### **1. Health Check**
+
+```bash
+curl http://localhost:8082/health
+```
+
+**Expected Response:**
 ```json
 {
-    "type": "flex",
-    "altText": "失智症分析結果",
-    "contents": {
-        "type": "bubble",
-        "size": "kilo",
-        "header": {...},
-        "body": {...}
+  "status": "healthy",
+  "service": "Enhanced Third-Party API Webhook",
+  "api_type": "openai",
+  "line_bot_configured": true,
+  "api_key_configured": true,
+  "supported_apis": ["openai", "gemini", "custom"]
+}
+```
+
+### **2. API Test**
+
+```bash
+curl -X POST http://localhost:8082/test \
+  -H "Content-Type: application/json" \
+  -d '{"message": "你好，請介紹一下你自己"}'
+```
+
+### **3. Switch API Type**
+
+```bash
+curl -X POST http://localhost:8082/switch_api \
+  -H "Content-Type: application/json" \
+  -d '{"api_type": "gemini"}'
+```
+
+## 🔄 API Switching
+
+### **Runtime API Switching**
+
+You can switch APIs during runtime:
+
+```python
+import requests
+
+# Switch to OpenAI
+response = requests.post("http://localhost:8082/switch_api", 
+                       json={"api_type": "openai"})
+
+# Switch to Gemini
+response = requests.post("http://localhost:8082/switch_api", 
+                       json={"api_type": "gemini"})
+
+# Switch to Custom API
+response = requests.post("http://localhost:8082/switch_api", 
+                       json={"api_type": "custom"})
+```
+
+## 📊 Monitoring
+
+### **Logs**
+
+The webhook server provides detailed logging:
+
+```
+INFO:__main__:🔄 Calling openai API: https://api.openai.com/v1/chat/completions
+INFO:__main__:📤 Sending message: 你好，請介紹一下你自己...
+INFO:__main__:✅ openai API response: 你好！我是一個AI助手...
+INFO:__main__:✅ Sent response to user_id: 你好！我是一個AI助手...
+```
+
+### **Error Handling**
+
+The system handles various errors gracefully:
+
+- **API Timeout:** Returns timeout message
+- **Network Error:** Returns connection error message
+- **Invalid Response:** Returns error with details
+- **Missing API Key:** Returns configuration error
+
+## 🎯 Benefits
+
+### **✅ Advantages:**
+
+1. **No Visualization Modules:** Direct text responses
+2. **Multiple API Support:** Easy switching between APIs
+3. **Simple Testing:** Direct API testing without LINE
+4. **Error Handling:** Graceful error management
+5. **Flexible Configuration:** Easy to customize
+
+### **🔧 Use Cases:**
+
+1. **API Testing:** Test different APIs quickly
+2. **Development:** Simple development workflow
+3. **Prototyping:** Rapid prototyping without complex UI
+4. **Debugging:** Easy to debug API responses
+
+## 🚀 Advanced Configuration
+
+### **Custom API Configuration**
+
+Edit `third_party_api_config.py` to add your custom API:
+
+```python
+CUSTOM_API_CONFIG = {
+    'url': 'https://your-api-endpoint.com/chat',
+    'headers': {
+        'Authorization': 'Bearer {api_key}',
+        'Content-Type': 'application/json'
+    },
+    'data_template': {
+        'message': '{user_message}',
+        'language': 'zh-TW',
+        'max_length': 500
     }
 }
 ```
 
-#### 格式 B: 純文字
-```json
-{
-    "text": "分析結果文字內容"
-}
+### **Response Parsing**
+
+Add your custom response parser:
+
+```python
+def parse_custom_response(response_data):
+    """Parse your custom API response"""
+    try:
+        return response_data.get('response', str(response_data))
+    except Exception as e:
+        raise Exception(f"Invalid custom API response: {e}")
 ```
 
-### 4. API 請求格式
+## 🔍 Troubleshooting
 
-系統會向第三方 API 發送以下格式的請求：
+### **Common Issues:**
 
-```json
-{
-    "message": "用戶輸入的訊息",
-    "user_id": "line_user"
-}
-```
+1. **API Key Not Configured:**
+   - Check your `.env` file
+   - Verify API_KEY is set correctly
 
-## 🔧 故障排除
+2. **Webhook Not Responding:**
+   - Check if server is running on port 8082
+   - Verify LINE webhook URL is correct
 
-### 常見問題
+3. **API Errors:**
+   - Check API key validity
+   - Verify API endpoint is accessible
+   - Check network connectivity
 
-1. **405 Method Not Allowed**
-   - 原因：API URL 不是正確的端點
-   - 解決：使用正確的 API 端點，不是網頁界面
+### **Debug Commands:**
 
-2. **401 Unauthorized**
-   - 原因：API Key 無效或未設定
-   - 解決：檢查 API Key 是否正確
-
-3. **404 Not Found**
-   - 原因：API URL 錯誤
-   - 解決：確認 API 端點是否正確
-
-### 測試方法
-
-運行測試腳本：
 ```bash
-python3 test_third_party_api.py
+# Check server status
+curl http://localhost:8082/health
+
+# Test API directly
+curl -X POST http://localhost:8082/test \
+  -H "Content-Type: application/json" \
+  -d '{"message": "test"}'
+
+# Check logs
+tail -f webhook.log
 ```
 
-## 📝 範例配置
+## 🎉 Conclusion
 
-### OpenAI API 配置範例
-```bash
-# .env 文件
-THIRD_PARTY_API_URL=https://api.openai.com/v1/chat/completions
-THIRD_PARTY_API_KEY=sk-1234567890abcdef1234567890abcdef1234567890abcdef
-USE_THIRD_PARTY_API=true
-THIRD_PARTY_API_NAME=OpenAI ChatGPT
-```
+This setup provides a clean, simple way to integrate third-party APIs with your LINE bot for testing purposes. The system is:
 
-### 自定義 API 配置範例
-```bash
-# .env 文件
-THIRD_PARTY_API_URL=https://your-api-server.com/api/chat
-THIRD_PARTY_API_KEY=your-custom-api-key
-USE_THIRD_PARTY_API=true
-THIRD_PARTY_API_NAME=自定義失智症API
-```
+- **Easy to configure**
+- **Flexible for different APIs**
+- **Simple to test and debug**
+- **Ready for production use**
 
-## 🚀 下一步
-
-1. 設定正確的 API 端點和 Key
-2. 運行測試腳本驗證連接
-3. 啟動 LINE Bot 服務
-4. 測試完整的對話流程 
+**Your LINE bot is now ready for direct third-party API integration!** 🚀 

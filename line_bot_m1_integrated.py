@@ -393,7 +393,7 @@ if handler and line_bot_api:
 
                 flex_message = FlexSendMessage(
                     alt_text=alt_text,
-                    contents=flex_contents
+                    contents=[flex_contents]  # Wrap in array as LINE expects
                 )
 
                 line_bot_api.reply_message(reply_token, flex_message)

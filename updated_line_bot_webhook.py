@@ -530,24 +530,76 @@ if handler and line_bot_api:
                 logger.info(f"✅ Sent Flex Message to {user_id}")
 
             elif analysis_response and "flex_message" in analysis_response:
-                # 🆕 Extract flex_message from analysis response (legacy format)
-                flex_contents = analysis_response["flex_message"]["contents"]
-
-                flex_message = FlexSendMessage(
-                    alt_text=analysis_response["flex_message"].get("altText", "失智症警訊分析結果"),
-                    contents=flex_contents
-                )
-
-                line_bot_api.reply_message(reply_token, flex_message)
-
-                # 🆕 Enhanced logging with RAG info
-                rag_info = analysis_response.get("rag_info", {})
-                analysis_data = analysis_response.get("analysis_data", {})
-
-                logger.info(f"✅ Sent enhanced analysis to {user_id}: "
-                           f"Code={analysis_data.get('matched_warning_code', 'N/A')}, "
-                           f"Confidence={analysis_data.get('confidence_level', 'N/A')}, "
-                           f"Method={rag_info.get('analysis_method', 'N/A')}")
+                # 🆕 Hybrid approach: Send text message first, then try Flex Message
+                analysis_text = analysis_response.get("result", {}).get("analysis", "分析完成")
+                confidence = analysis_response.get("result", {}).get("confidence", "N/A")
+                
+                # Always send text message first (guaranteed to work)
+                simple_message = f"🧠 AI 分析結果:\n\n{analysis_text}\n\n信心度: {confidence}"
+                text_message = TextSendMessage(text=simple_message)
+                line_bot_api.reply_message(reply_token, text_message)
+                
+                # Try to send a simplified Flex Message as a second message
+                try:
+                    # Create a simple, valid Flex Message
+                    simple_flex = {
+                        "type": "bubble",
+                        "size": "mega",
+                        "header": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "backgroundColor": "#F8F9FA",
+                            "paddingAll": "16px",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": "詳細分析報告",
+                                    "size": "lg",
+                                    "weight": "bold",
+                                    "color": "#212121"
+                                }
+                            ]
+                        },
+                        "body": {
+                            "type": "box",
+                            "layout": "vertical",
+                            "spacing": "md",
+                            "paddingAll": "16px",
+                            "contents": [
+                                {
+                                    "type": "text",
+                                    "text": f"分析結果: {analysis_text}",
+                                    "size": "sm",
+                                    "color": "#666666",
+                                    "wrap": True
+                                },
+                                {
+                                    "type": "text",
+                                    "text": f"信心度: {confidence}",
+                                    "size": "sm",
+                                    "color": "#2196F3"
+                                }
+                            ]
+                        }
+                    }
+                    
+                    flex_message = FlexSendMessage(
+                        alt_text="詳細分析報告",
+                        contents=simple_flex
+                    )
+                    
+                    # Send as a separate message
+                    line_bot_api.push_message(user_id, flex_message)
+                    
+                except Exception as flex_error:
+                    logger.warning(f"Flex Message failed, but text message sent: {flex_error}")
+                
+                # 🆕 Enhanced logging
+                analysis_data = analysis_response.get("result", {})
+                logger.info(f"✅ Sent hybrid response to {user_id}: "
+                           f"Module={analysis_response.get('module', 'N/A')}, "
+                           f"Signs={analysis_data.get('matched_signs', 'N/A')}, "
+                           f"Analysis={analysis_data.get('analysis', 'N/A')}")
 
             else:
                 error_flex = create_error_flex_message("AI 分析服務暫時無法使用")

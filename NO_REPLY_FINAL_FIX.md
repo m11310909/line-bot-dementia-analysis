@@ -9,14 +9,14 @@
 
 ## 🔗 Current Working Webhook URL
 ```
-https://540bd8d78023.ngrok-free.app/webhook
+https://ed0da62e4995.ngrok-free.app/webhook
 ```
 
 ## 📋 IMMEDIATE ACTION REQUIRED
 
 ### 1. Update LINE Developer Console
 1. Go to https://developers.line.biz/
-2. Set webhook URL to: `https://540bd8d78023.ngrok-free.app/webhook`
+2. Set webhook URL to: `https://ed0da62e4995.ngrok-free.app/webhook`
 3. Enable webhook
 4. Save changes
 
@@ -35,7 +35,7 @@ curl http://localhost:8005/health
 
 ### Test webhook:
 ```bash
-curl https://540bd8d78023.ngrok-free.app/health
+curl https://ed0da62e4995.ngrok-free.app/health
 ```
 
 ### Get current URL:
@@ -51,7 +51,7 @@ python3 no_reply_final_fix.py
 ## 🔧 Troubleshooting
 
 ### If still no reply:
-1. **Check webhook URL**: Make sure it's exactly `https://540bd8d78023.ngrok-free.app/webhook`
+1. **Check webhook URL**: Make sure it's exactly `https://ed0da62e4995.ngrok-free.app/webhook`
 2. **Test health**: Run the curl commands above
 3. **Restart system**: Run `python3 no_reply_final_fix.py`
 4. **Check logs**: Look for any error messages
@@ -74,10 +74,10 @@ python3 no_reply_final_fix.py
 curl http://localhost:8005/health
 
 # Test webhook
-curl https://540bd8d78023.ngrok-free.app/health
+curl https://ed0da62e4995.ngrok-free.app/health
 ```
 
 ---
-**Fixed**: 2025-08-02 11:02:55
+**Fixed**: 2025-08-05 11:44:29
 **Status**: Ready for testing
 **Error**: Resolved - All services working

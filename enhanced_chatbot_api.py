@@ -228,30 +228,52 @@ def analyze_m4_care_needs(text: str) -> Dict[str, Any]:
     }
 
 def create_enhanced_m1_flex_message(analysis: Dict[str, Any], original_text: str) -> Dict[str, Any]:
-    """創建增強版 M1 警訊 Flex Message + XAI 視覺化"""
+    """創建增強版 M1 警訊 Flex Message - 基於附圖設計"""
     
-    # 根據檢測到的警訊數量決定顏色
+    # 根據檢測到的警訊數量決定風險等級
     warning_count = len(analysis.get("detected_signs", []))
     if warning_count >= 3:
-        header_color = "#E74C3C"  # 紅色 - 高風險
-        severity_text = "高風險"
+        risk_level = "高風險"
+        risk_color = "#E74C3C"
     elif warning_count >= 1:
-        header_color = "#F39C12"  # 橙色 - 中風險
-        severity_text = "中風險"
+        risk_level = "中風險"
+        risk_color = "#F39C12"
     else:
-        header_color = "#27AE60"  # 綠色 - 低風險
-        severity_text = "低風險"
-    
-    signs_text = "\n• ".join(analysis["detected_signs"]) if analysis["detected_signs"] else "未檢測到明顯警訊"
+        risk_level = "低風險"
+        risk_color = "#27AE60"
     
     # XAI 數據
     xai_data = analysis.get("xai_data", {})
-    confidence_score = xai_data.get("confidence_score", 0.5)
-    reasoning_steps = xai_data.get("reasoning_steps", [])
-    
-    # 創建信心度視覺化
+    confidence_score = xai_data.get("confidence_score", 0.85)
     confidence_percentage = int(confidence_score * 100)
-    confidence_color = "#4CAF50" if confidence_score >= 0.8 else "#FF9800" if confidence_score >= 0.6 else "#F44336"
+    
+    # 警訊列表 - 確保中文正確顯示
+    warnings = analysis.get("detected_signs", [])
+    warning_buttons = []
+    for i, warning in enumerate(warnings[:3]):  # 最多顯示3個警訊
+        warning_buttons.append({
+            "type": "button",
+            "action": {
+                "type": "postback",
+                "label": warning,
+                "data": f"warning_detail_{i+1}"
+            },
+            "style": "link",
+            "color": "#666666",
+            "height": "sm"
+        })
+    
+    # 如果沒有警訊，顯示預設訊息
+    if not warnings:
+        warning_buttons.append({
+            "type": "text",
+            "text": "未檢測到明顯警訊",
+            "size": "sm",
+            "color": "#27AE60"
+        })
+    
+    # 分析摘要文字 - 確保中文正確顯示
+    analysis_text = analysis.get("chatbot_reply", "根據您的描述進行了初步分析，建議進一步觀察。")
     
     return {
         "type": "flex",
@@ -269,35 +291,32 @@ def create_enhanced_m1_flex_message(analysis: Dict[str, Any], original_text: str
                         "contents": [
                             {
                                 "type": "text",
-                                "text": "🚨",
-                                "size": "lg",
-                                "flex": 0
+                                "text": "警訊分析",
+                                "color": "#ffffff",
+                                "weight": "bold",
+                                "size": "lg"
                             },
                             {
                                 "type": "box",
-                                "layout": "vertical",
+                                "layout": "horizontal",
                                 "contents": [
                                     {
                                         "type": "text",
-                                        "text": "M1 警訊分析",
-                                        "weight": "bold",
-                                        "color": "#ffffff",
-                                        "size": "lg"
+                                        "text": "🚨",
+                                        "size": "sm"
                                     },
                                     {
                                         "type": "text",
-                                        "text": "AI 驅動的失智症警訊評估",
+                                        "text": risk_level,
                                         "color": "#ffffff",
-                                        "size": "xs",
-                                        "opacity": 0.8
+                                        "size": "sm"
                                     }
-                                ],
-                                "flex": 1
+                                ]
                             }
                         ]
                     }
                 ],
-                "backgroundColor": header_color,
+                "backgroundColor": "#27AE60",
                 "paddingAll": "20px"
             },
             "body": {
@@ -305,34 +324,206 @@ def create_enhanced_m1_flex_message(analysis: Dict[str, Any], original_text: str
                 "layout": "vertical",
                 "spacing": "md",
                 "contents": [
+                    # AI 信心度區塊
                     {
                         "type": "box",
                         "layout": "horizontal",
                         "contents": [
                             {
                                 "type": "text",
-                                "text": "📊 風險評估",
-                                "weight": "bold",
+                                "text": "AI信心度",
                                 "size": "sm",
-                                "flex": 0
+                                "color": "#666666"
                             },
                             {
-                                "type": "text",
-                                "text": severity_text,
-                                "color": header_color,
-                                "weight": "bold",
-                                "size": "sm",
-                                "align": "end"
+                                "type": "box",
+                                "layout": "horizontal",
+                                "contents": [
+                                    {
+                                        "type": "box",
+                                        "layout": "horizontal",
+                                        "contents": [
+                                            {
+                                                "type": "box",
+                                                "layout": "horizontal",
+                                                "contents": [],
+                                                "backgroundColor": "#E0E0E0",
+                                                "width": f"{confidence_percentage}%",
+                                                "height": "8px"
+                                            }
+                                        ],
+                                        "backgroundColor": "#F5F5F5",
+                                        "width": "60px",
+                                        "height": "8px"
+                                    },
+                                    {
+                                        "type": "text",
+                                        "text": f"{confidence_percentage}%",
+                                        "size": "lg",
+                                        "weight": "bold",
+                                        "color": "#000000"
+                                    }
+                                ]
                             }
                         ]
                     },
                     {
-                        "type": "separator"
+                        "type": "separator",
+                        "margin": "md"
+                    },
+                    # 分析摘要區塊
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "👨‍⚕️",
+                                "size": "sm"
+                            },
+                            {
+                                "type": "text",
+                                "text": "分析",
+                                "size": "sm",
+                                "color": "#666666"
+                            }
+                        ]
                     },
                     {
                         "type": "text",
-                        "text": f"📝 您的描述：\n{original_text}",
-                        "wrap": True,
+                        "text": analysis_text,
+                        "size": "sm",
+                        "color": "#666666",
+                        "wrap": True
+                    },
+                    {
+                        "type": "separator",
+                        "margin": "md"
+                    },
+                    # 警訊區塊
+                    {
+                        "type": "box",
+                        "layout": "horizontal",
+                        "contents": [
+                            {
+                                "type": "text",
+                                "text": "!!",
+                                "color": "#FF6B6B",
+                                "size": "sm"
+                            },
+                            {
+                                "type": "text",
+                                "text": "警訊",
+                                "color": "#FF6B6B",
+                                "size": "sm"
+                            }
+                        ]
+                    },
+                    {
+                        "type": "box",
+                        "layout": "vertical",
+                        "spacing": "sm",
+                        "contents": warning_buttons
+                    }
+                ],
+                "paddingAll": "20px"
+            },
+            "footer": {
+                "type": "box",
+                "layout": "vertical",
+                "spacing": "sm",
+                "contents": [
+                    {
+                        "type": "button",
+                        "action": {
+                            "type": "uri",
+                            "label": "🛒 AI小幫手原文",
+                            "uri": "https://your-liff-url.com/original-text"
+                        },
+                        "style": "link",
+                        "color": "#27AE60"
+                    },
+                    {
+                        "type": "button",
+                        "action": {
+                            "type": "uri",
+                            "label": "📊 查看完整分析",
+                            "uri": "https://your-liff-url.com/full-analysis"
+                        },
+                        "style": "primary",
+                        "color": "#27AE60"
+                    },
+                    {
+                        "type": "button",
+                        "action": {
+                            "type": "postback",
+                            "label": "💡 建議下一步",
+                            "data": "next_steps"
+                        },
+                        "style": "secondary",
+                        "color": "#3498DB"
+                    }
+                ]
+            }
+        }
+    }
+
+def create_simplified_m1_flex_message(analysis: Dict[str, Any], original_text: str) -> Dict[str, Any]:
+    """創建簡化版 M1 警訊 Flex Message - 避免亂碼"""
+    
+    # 根據檢測到的警訊數量決定風險等級
+    warning_count = len(analysis.get("detected_signs", []))
+    if warning_count >= 3:
+        risk_level = "高風險"
+    elif warning_count >= 1:
+        risk_level = "中風險"
+    else:
+        risk_level = "低風險"
+    
+    # XAI 數據
+    xai_data = analysis.get("xai_data", {})
+    confidence_score = xai_data.get("confidence_score", 0.85)
+    confidence_percentage = int(confidence_score * 100)
+    
+    # 簡化的分析文字
+    analysis_text = "檢測到早期警訊，建議密切觀察。"
+    if warnings := analysis.get("detected_signs", []):
+        analysis_text = f"檢測到 {len(warnings)} 個警訊，建議專業評估。"
+    
+    return {
+        "type": "flex",
+        "altText": "M1 警訊分析結果",
+        "contents": {
+            "type": "bubble",
+            "size": "kilo",
+            "header": {
+                "type": "box",
+                "layout": "vertical",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": "警訊分析",
+                        "color": "#ffffff",
+                        "weight": "bold",
+                        "size": "lg"
+                    },
+                    {
+                        "type": "text",
+                        "text": risk_level,
+                        "color": "#ffffff",
+                        "size": "sm"
+                    }
+                ],
+                "backgroundColor": "#27AE60"
+            },
+            "body": {
+                "type": "box",
+                "layout": "vertical",
+                "spacing": "md",
+                "contents": [
+                    {
+                        "type": "text",
+                        "text": f"AI信心度: {confidence_percentage}%",
                         "size": "sm",
                         "color": "#666666"
                     },
@@ -341,110 +532,39 @@ def create_enhanced_m1_flex_message(analysis: Dict[str, Any], original_text: str
                     },
                     {
                         "type": "text",
-                        "text": f"🔍 分析結果：\n{analysis['analysis']}",
-                        "wrap": True,
-                        "size": "sm"
-                    },
-                    {
-                        "type": "separator"
-                    },
-                    {
-                        "type": "text",
-                        "text": f"⚠️ 檢測到的警訊：\n• {signs_text}",
-                        "wrap": True,
+                        "text": analysis_text,
                         "size": "sm",
-                        "color": header_color if analysis["detected_signs"] else "#27AE60"
-                    },
-                    {
-                        "type": "separator"
-                    },
-                    # XAI 信心度視覺化
-                    {
-                        "type": "box",
-                        "layout": "horizontal",
-                        "contents": [
-                            {
-                                "type": "text",
-                                "text": "🎯 AI 信心度",
-                                "weight": "bold",
-                                "size": "sm",
-                                "flex": 0
-                            },
-                            {
-                                "type": "text",
-                                "text": f"{confidence_percentage}%",
-                                "color": confidence_color,
-                                "weight": "bold",
-                                "size": "sm",
-                                "align": "end"
-                            }
-                        ]
-                    },
-                    {
-                        "type": "box",
-                        "layout": "horizontal",
-                        "backgroundColor": "#F0F0F0",
-                        "height": "8px",
-                        "contents": [
-                            {
-                                "type": "box",
-                                "layout": "vertical",
-                                "backgroundColor": confidence_color,
-                                "width": f"{confidence_percentage}%",
-                                "contents": []
-                            }
-                        ]
-                    },
-                    # XAI 推理路徑（簡化版）
-                    {
-                        "type": "text",
-                        "text": "🧠 推理路徑：",
-                        "weight": "bold",
-                        "size": "sm",
-                        "margin": "md"
-                    },
-                    {
-                        "type": "text",
-                        "text": " → ".join(reasoning_steps[:3]) if reasoning_steps else "基於症狀關鍵詞分析",
-                        "size": "xs",
                         "color": "#666666",
                         "wrap": True
-                    },
-                    {
-                        "type": "separator"
-                    },
-                    # 失智小幫手文字回覆
-                    {
-                        "type": "text",
-                        "text": "💬 失智小幫手：",
-                        "weight": "bold",
-                        "size": "sm",
-                        "margin": "md",
-                        "color": "#2E86AB"
-                    },
-                    {
-                        "type": "text",
-                        "text": analysis.get("chatbot_reply", "感謝您的分享，建議您諮詢專業醫師進行評估。"),
-                        "size": "sm",
-                        "color": "#2E86AB",
-                        "wrap": True
                     }
-                ],
-                "paddingAll": "20px"
+                ]
             },
             "footer": {
                 "type": "box",
                 "layout": "vertical",
+                "spacing": "sm",
                 "contents": [
                     {
-                        "type": "text",
-                        "text": "💡 建議：及早發現，及早介入",
-                        "size": "xs",
-                        "color": "#666666",
-                        "align": "center"
+                        "type": "button",
+                        "action": {
+                            "type": "uri",
+                            "label": "查看完整分析",
+                            "uri": "https://your-liff-url.com/full-analysis"
+                        },
+                        "style": "primary",
+                        "color": "#27AE60"
+                    },
+                    {
+                        "type": "button",
+                        "action": {
+                            "type": "postback",
+                            "label": "建議下一步",
+                            "data": "next_steps"
+                        },
+                        "style": "secondary",
+                        "color": "#3498DB"
                     }
-                ],
-                "paddingAll": "15px"
+                ]
             }
         }
     }
@@ -1392,7 +1512,8 @@ async def analyze_m1(request: ChatbotRequest) -> ChatbotResponse:
             raise HTTPException(status_code=400, detail="訊息不能為空")
         
         analysis = analyze_m1_warning_signs(message)
-        flex_message = create_enhanced_m1_flex_message(analysis, message)
+        # 使用簡化版本避免亂碼
+        flex_message = create_simplified_m1_flex_message(analysis, message)
         
         return ChatbotResponse(**flex_message)
         

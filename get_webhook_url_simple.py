@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Get Current Webhook URL
-Simple script to get the ngrok webhook URL
+Simple Webhook URL Getter
+Gets the current ngrok webhook URL
 """
 
 import requests
@@ -9,9 +9,23 @@ import json
 from datetime import datetime
 
 def get_webhook_url():
-    """Get the current ngrok webhook URL"""
+    """Get the current webhook URL from ngrok"""
     try:
-        response = requests.get("http://localhost:4040/api/tunnels", timeout=5)
+        # Start ngrok if not running
+        import subprocess
+        import time
+        
+        # Check if ngrok is running
+        result = subprocess.run(['ps', 'aux'], capture_output=True, text=True)
+        if 'ngrok http 8081' not in result.stdout:
+            print("Starting ngrok...")
+            subprocess.Popen(['ngrok', 'http', '8081'], 
+                           stdout=subprocess.DEVNULL, 
+                           stderr=subprocess.DEVNULL)
+            time.sleep(5)
+        
+        # Get tunnel URL
+        response = requests.get("http://localhost:4040/api/tunnels", timeout=10)
         if response.status_code == 200:
             tunnels = response.json()
             if tunnels.get("tunnels"):
@@ -58,6 +72,8 @@ Expected response: Rich Flex Message with analysis
 """)
                 
                 print(f"\n📄 Webhook URL saved to: CURRENT_WEBHOOK_URL.md")
+                print(f"\n🎉 Setup complete!")
+                print(f"📱 Update your LINE webhook URL to: {webhook_url}")
                 return webhook_url
             else:
                 print("❌ No ngrok tunnels found")
@@ -67,14 +83,9 @@ Expected response: Rich Flex Message with analysis
             return None
     except Exception as e:
         print(f"❌ Failed to get webhook URL: {e}")
+        print("💡 Try running: ngrok http 8081")
         return None
 
 if __name__ == "__main__":
     print("🔍 Getting current webhook URL...")
-    webhook_url = get_webhook_url()
-    
-    if webhook_url:
-        print(f"\n🎉 Setup complete!")
-        print(f"📱 Update your LINE webhook URL to: {webhook_url}")
-    else:
-        print(f"\n⚠️  Please start ngrok: ngrok http 8081") 
+    get_webhook_url() 

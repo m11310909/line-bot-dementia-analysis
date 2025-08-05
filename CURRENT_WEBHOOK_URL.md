@@ -1,26 +1,12 @@
-# 🔗 Current Working Webhook URL
+# Current Webhook URL
 
-## ✅ Status: WORKING
-**URL**: `https://ed0da62e4995.ngrok-free.app/webhook`
+**URL:** https://a3527fa7720b.ngrok-free.app/webhook
 
-## 📋 IMMEDIATE ACTION REQUIRED
+**Last Updated:** 2025-08-05 16:14:36
 
-### Update LINE Developer Console:
-1. Go to https://developers.line.biz/
-2. Set webhook URL to: `https://ed0da62e4995.ngrok-free.app/webhook`
+## Instructions
+
+1. Go to LINE Developer Console
+2. Set webhook URL to: `https://a3527fa7720b.ngrok-free.app/webhook`
 3. Enable webhook
-4. Save changes
-
-### Test the Bot:
-Send: `爸爸不會用洗衣機`
-
-## 🧪 Verification:
-```bash
-curl https://ed0da62e4995.ngrok-free.app/health
-```
-
-## 🔧 If URL Changes:
-Run: `python3 final_solution.py`
-
----
-**Last Updated**: 2025-08-05 11:46:03
+4. Test with: '爸爸不會用洗衣機'

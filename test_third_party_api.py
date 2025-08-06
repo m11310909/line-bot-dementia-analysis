@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Test Third Party API Usage
-Verify that the webhook is using the third-party API
+測試第三方 API 失智症小幫手1 的連接和回應
+支援 OpenAI API 和其他自定義 API
 """
 
 import requests
@@ -9,105 +9,135 @@ import json
 import os
 from dotenv import load_dotenv
 
+# 載入環境變數
 load_dotenv()
 
-def test_third_party_api_config():
-    """Test third-party API configuration"""
-    print("🔍 Testing Third-Party API Configuration...")
+def test_openai_api(api_key: str, test_messages: list):
+    """測試 OpenAI API"""
+    print("🤖 測試 OpenAI API")
+    print(f"🔑 API Key: {'已設定' if api_key else '未設定'}")
+    print("-" * 50)
     
-    # Check environment variables
-    use_third_party = os.getenv('USE_THIRD_PARTY_API', 'false').lower() == 'true'
-    third_party_url = os.getenv('THIRD_PARTY_API_URL', '')
-    third_party_name = os.getenv('THIRD_PARTY_API_NAME', '')
+    headers = {
+        "Content-Type": "application/json",
+        "Authorization": f"Bearer {api_key}"
+    }
     
-    print(f"📊 USE_THIRD_PARTY_API: {use_third_party}")
-    print(f"📊 THIRD_PARTY_API_URL: {third_party_url}")
-    print(f"📊 THIRD_PARTY_API_NAME: {third_party_name}")
-    
-    if use_third_party and third_party_url:
-        print("✅ Third-party API is configured")
-        return True
-    else:
-        print("❌ Third-party API not properly configured")
-        return False
-
-def test_webhook_api_selection():
-    """Test webhook API selection"""
-    print("\n🔍 Testing Webhook API Selection...")
-    
-    try:
-        response = requests.post(
-            "http://localhost:8081/test-webhook",
-            json={"text": "爸爸不會用洗衣機"},
-            timeout=10
-        )
+    for i, message in enumerate(test_messages, 1):
+        print(f"📝 測試 {i}: {message}")
         
-        if response.status_code == 200:
-            data = response.json()
-            print(f"✅ Webhook test endpoint: {response.status_code}")
-            print(f"📊 Platform: {data.get('platform', 'unknown')}")
-            print(f"📊 Version: {data.get('version', 'unknown')}")
-            return True
-        else:
-            print(f"❌ Webhook test failed: {response.status_code}")
-            return False
-            
-    except Exception as e:
-        print(f"❌ Webhook test error: {e}")
-        return False
-
-def test_third_party_api_direct():
-    """Test third-party API directly"""
-    print("\n🔍 Testing Third-Party API Directly...")
-    
-    third_party_url = os.getenv('THIRD_PARTY_API_URL', '')
-    if not third_party_url:
-        print("❌ THIRD_PARTY_API_URL not set")
-        return False
-    
-    try:
-        # Test the third-party API URL
-        response = requests.get(third_party_url, timeout=10)
-        print(f"📊 Third-party API Status: {response.status_code}")
+        # OpenAI API 請求格式
+        payload = {
+            "model": "gpt-3.5-turbo",
+            "messages": [
+                {
+                    "role": "system",
+                    "content": "你是一個專業的失智症照護助手，專門協助家屬處理失智症相關問題。請用中文回答，並提供實用的建議。"
+                },
+                {
+                    "role": "user",
+                    "content": message
+                }
+            ],
+            "max_tokens": 500,
+            "temperature": 0.7
+        }
         
-        if response.status_code == 200:
-            print("✅ Third-party API is accessible")
-            return True
-        else:
-            print(f"❌ Third-party API error: {response.status_code}")
-            return False
+        try:
+            response = requests.post(
+                "https://api.openai.com/v1/chat/completions",
+                json=payload,
+                headers=headers,
+                timeout=30
+            )
             
-    except Exception as e:
-        print(f"❌ Third-party API test failed: {e}")
-        return False
+            print(f"📊 狀態碼: {response.status_code}")
+            
+            if response.status_code == 200:
+                result = response.json()
+                if 'choices' in result and len(result['choices']) > 0:
+                    content = result['choices'][0]['message']['content']
+                    print(f"✅ 成功: {content[:100]}...")
+                else:
+                    print("❌ 回應格式錯誤")
+            else:
+                print(f"❌ 錯誤: {response.text[:200]}...")
+                
+        except Exception as e:
+            print(f"❌ 請求失敗: {str(e)}")
+        
+        print("-" * 50)
+
+def test_custom_api(api_url: str, api_key: str, api_name: str, test_messages: list):
+    """測試自定義 API"""
+    print(f"🧪 測試 {api_name}")
+    print(f"📍 API URL: {api_url}")
+    print(f"🔑 API Key: {'已設定' if api_key else '未設定'}")
+    print("-" * 50)
+    
+    headers = {"Content-Type": "application/json"}
+    if api_key:
+        headers["Authorization"] = f"Bearer {api_key}"
+    
+    for i, message in enumerate(test_messages, 1):
+        print(f"📝 測試 {i}: {message}")
+        
+        try:
+            response = requests.post(
+                api_url,
+                json={"message": message, "user_id": "test_user"},
+                headers=headers,
+                timeout=30
+            )
+            
+            print(f"📊 狀態碼: {response.status_code}")
+            
+            if response.status_code == 200:
+                try:
+                    result = response.json()
+                    print(f"✅ 成功: {str(result)[:200]}...")
+                except:
+                    print(f"✅ 成功: {response.text[:200]}...")
+            else:
+                print(f"❌ 錯誤: {response.text[:200]}...")
+                
+        except Exception as e:
+            print(f"❌ 請求失敗: {str(e)}")
+        
+        print("-" * 50)
 
 def main():
-    print("=" * 50)
-    print("🔧 Third-Party API Test")
-    print("=" * 50)
+    """主測試函數"""
     
-    config_ok = test_third_party_api_config()
-    webhook_ok = test_webhook_api_selection()
-    api_ok = test_third_party_api_direct()
+    # 獲取配置
+    api_url = os.getenv('THIRD_PARTY_API_URL')
+    api_key = os.getenv('THIRD_PARTY_API_KEY')
+    api_name = os.getenv('THIRD_PARTY_API_NAME', '第三方 API')
     
-    print("\n" + "=" * 50)
-    print("📊 Test Results:")
-    print(f"✅ Configuration: {'OK' if config_ok else 'FAILED'}")
-    print(f"✅ Webhook Selection: {'OK' if webhook_ok else 'FAILED'}")
-    print(f"✅ Third-Party API: {'OK' if api_ok else 'FAILED'}")
+    if not api_url:
+        print("❌ 錯誤：未設定 THIRD_PARTY_API_URL")
+        print("請在 .env 文件中設定正確的 API URL")
+        return
     
-    if config_ok and webhook_ok:
-        print("\n�� Third-Party API is configured!")
-        print("✅ Webhook will use third-party API")
-        print("✅ Ready for LINE messages")
-        print("\n📋 Next Steps:")
-        print("1. Send message to your LINE bot")
-        print("2. Expected: Third-party API response")
+    # 測試訊息
+    test_messages = [
+        "媽媽最近常忘記關瓦斯爐",
+        "爸爸中度失智，需要全天候照顧",
+        "爺爺有妄想症狀，常說有人要害他",
+        "需要醫療協助和照護資源"
+    ]
+    
+    # 判斷 API 類型
+    if "openai.com" in api_url or "api.openai.com" in api_url:
+        test_openai_api(api_key, test_messages)
     else:
-        print("\n❌ Some tests failed")
-        print("🔧 Check third-party API configuration")
+        test_custom_api(api_url, api_key, api_name, test_messages)
     
-    print("=" * 50)
+    print("🏁 測試完成")
+    print("\n💡 提示：")
+    print("- 如果測試成功，您可以啟動 LINE Bot 服務")
+    print("- 如果測試失敗，請檢查 API URL 和 Key 是否正確")
+    print("- 參考 THIRD_PARTY_API_SETUP.md 獲取詳細配置說明")
 
 if __name__ == "__main__":
     main() 

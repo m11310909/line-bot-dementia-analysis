@@ -35,9 +35,9 @@ LINE_CHANNEL_ACCESS_TOKEN = os.getenv('LINE_CHANNEL_ACCESS_TOKEN')
 LINE_CHANNEL_SECRET = os.getenv('LINE_CHANNEL_SECRET')
 
 # 🆕 Updated for RAG API integration
-FLEX_API_URL = os.getenv('FLEX_API_URL', 'http://localhost:8005/analyze/M1')  # ← 更新為正確的端點
+FLEX_API_URL = os.getenv('FLEX_API_URL', 'http://localhost:8005/comprehensive-analysis')  # ← 更新為 8005
 RAG_HEALTH_URL = os.getenv('RAG_HEALTH_URL', 'http://localhost:8005/health')  # ← 新增健康檢查
-RAG_ANALYZE_URL = os.getenv('RAG_ANALYZE_URL', 'http://localhost:8005/analyze/M1')  # ← 新增詳細分析
+RAG_ANALYZE_URL = os.getenv('RAG_ANALYZE_URL', 'http://localhost:8005/comprehensive-analysis')  # ← 新增詳細分析
 
 # 🆕 失智小助手chatbot API Configuration
 CHATBOT_API_URL = os.getenv('CHATBOT_API_URL', '')  # Your chatbot API URL
@@ -47,7 +47,7 @@ USE_CHATBOT_API = os.getenv('USE_CHATBOT_API', 'false').lower() == 'true'  # Tog
 # 🆕 第三方 API 失智症小幫手1 配置
 THIRD_PARTY_API_URL = os.getenv('THIRD_PARTY_API_URL', '')  # 第三方 API URL
 THIRD_PARTY_API_KEY = os.getenv('THIRD_PARTY_API_KEY', '')  # 第三方 API Key
-USE_THIRD_PARTY_API = os.getenv('USE_THIRD_PARTY_API', 'false').lower() == 'true'  # 預設使用 RAG API
+USE_THIRD_PARTY_API = os.getenv('USE_THIRD_PARTY_API', 'true').lower() == 'true'  # 預設使用第三方 API
 THIRD_PARTY_API_NAME = os.getenv('THIRD_PARTY_API_NAME', '失智症小幫手1')  # API 名稱
 
 # Replit-specific configuration

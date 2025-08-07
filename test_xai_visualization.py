@@ -1,203 +1,197 @@
 #!/usr/bin/env python3
 """
-測試 M1-M4 視覺化模組的 XAI 功能
+XAI 視覺化模組測試腳本
+遵循 Cursor IDE 指南進行測試
 """
 
 import requests
 import json
 import time
+from typing import Dict, Any
 
-def test_xai_visualization():
-    """測試 XAI 視覺化功能"""
-    
-    base_url = "http://localhost:8008"
+def test_xai_visualization_flow():
+    """測試完整的 XAI 視覺化流程"""
+    print("🧪 XAI 視覺化模組測試")
+    print("=" * 50)
     
     # 測試案例
     test_cases = [
         {
-            "message": "媽媽總是忘記關瓦斯",
+            "input": "爸爸不會用洗衣機",
             "expected_module": "M1",
-            "description": "M1 警訊分析 - 忘記關瓦斯"
+            "description": "M1 警訊檢測 - 功能喪失"
         },
         {
-            "message": "爸爸中度失智，經常迷路",
+            "input": "媽媽中度失智，需要協助",
             "expected_module": "M2", 
-            "description": "M2 病程階段 - 中度失智"
+            "description": "M2 病程評估 - 階段判斷"
         },
         {
-            "message": "爺爺有妄想症狀，懷疑有人偷東西",
+            "input": "爺爺最近情緒不穩定，常常發脾氣",
             "expected_module": "M3",
-            "description": "M3 BPSD 症狀 - 妄想症狀"
+            "description": "M3 BPSD 症狀 - 情緒問題"
         },
         {
-            "message": "需要醫療協助和照護資源",
+            "input": "需要照護建議和資源",
             "expected_module": "M4",
-            "description": "M4 照護需求 - 醫療和照護"
+            "description": "M4 照護導航 - 資源需求"
         }
     ]
     
-    print("🧪 開始測試 M1-M4 XAI 視覺化功能")
-    print("=" * 50)
+    api_url = "http://localhost:8005/comprehensive-analysis"
     
     for i, test_case in enumerate(test_cases, 1):
         print(f"\n📋 測試案例 {i}: {test_case['description']}")
-        print(f"📝 輸入訊息: {test_case['message']}")
+        print(f"輸入: {test_case['input']}")
+        print(f"預期模組: {test_case['expected_module']}")
         
         try:
-            # 測試自動模組選擇
+            # 發送請求
             response = requests.post(
-                f"{base_url}/analyze",
-                json={"message": test_case['message'], "user_id": "test_user"},
+                api_url,
+                json={"user_input": test_case['input']},
+                headers={"Content-Type": "application/json"},
                 timeout=10
             )
             
             if response.status_code == 200:
                 result = response.json()
-                print(f"✅ 自動模組選擇成功")
-                print(f"📊 回應類型: {result.get('type', 'N/A')}")
-                print(f"📝 回應長度: {len(json.dumps(result))} 字符")
+                print("✅ API 回應成功")
+                print(f"📊 使用模組: {result.get('modules_used', [])}")
+                print(f"🔍 找到片段: {len(result.get('retrieved_chunks', []))}")
+                print(f"⏱️  回應時間: {response.elapsed.total_seconds():.3f}秒")
                 
-                # 檢查 XAI 元素
-                contents = result.get('contents', {})
-                body = contents.get('body', {})
-                body_contents = body.get('contents', [])
-                
-                xai_elements = []
-                confidence_found = False
-                reasoning_found = False
-                
-                for element in body_contents:
-                    if isinstance(element, dict):
-                        text = element.get('text', '')
-                        # 檢查信心度元素
-                        if 'AI 信心度' in text or '🎯' in text:
-                            confidence_found = True
-                            xai_elements.append(f"信心度: {text}")
-                        # 檢查推理路徑元素
-                        elif '推理路徑' in text or '🧠' in text:
-                            reasoning_found = True
-                            xai_elements.append(f"推理路徑: {text}")
-                        # 檢查進度條元素
-                        elif element.get('backgroundColor') and element.get('height') == '8px':
-                            xai_elements.append("信心度進度條")
-                
-                if xai_elements:
-                    print(f"🎯 檢測到 XAI 元素: {len(xai_elements)} 個")
-                    for element in xai_elements[:3]:  # 顯示前3個
-                        print(f"   - {element}")
+                # 檢查是否包含預期模組
+                if test_case['expected_module'] in result.get('modules_used', []):
+                    print(f"✅ 正確檢測到 {test_case['expected_module']} 模組")
                 else:
-                    print("⚠️ 未檢測到 XAI 元素")
-                
-                print(f"🎯 信心度視覺化: {'✅' if confidence_found else '❌'}")
-                print(f"🧠 推理路徑: {'✅' if reasoning_found else '❌'}")
+                    print(f"⚠️  未檢測到預期的 {test_case['expected_module']} 模組")
                     
             else:
-                print(f"❌ 請求失敗: {response.status_code}")
-                print(f"錯誤訊息: {response.text}")
+                print(f"❌ API 錯誤: {response.status_code}")
+                print(f"錯誤內容: {response.text}")
                 
         except Exception as e:
-            print(f"❌ 測試失敗: {str(e)}")
-        
-        time.sleep(1)  # 避免請求過於頻繁
-    
-    # 測試 XAI 資訊端點
-    print(f"\n🔍 測試 XAI 資訊端點")
-    try:
-        xai_response = requests.get(f"{base_url}/xai-info", timeout=10)
-        if xai_response.status_code == 200:
-            xai_info = xai_response.json()
-            print(f"✅ XAI 資訊獲取成功")
-            print(f"📊 版本: {xai_info.get('version', 'N/A')}")
-            print(f"🎯 XAI 功能數量: {len(xai_info.get('xai_features', {}))}")
-            print(f"📋 模組數量: {len(xai_info.get('modules', {}))}")
-        else:
-            print(f"❌ XAI 資訊獲取失敗: {xai_response.status_code}")
-    except Exception as e:
-        print(f"❌ XAI 資訊測試失敗: {str(e)}")
+            print(f"❌ 測試失敗: {e}")
     
     print("\n" + "=" * 50)
-    print("🎉 XAI 視覺化功能測試完成")
+    print("🎯 XAI 視覺化測試完成")
+
 
 def test_individual_modules():
-    """測試個別模組的 XAI 功能"""
-    
-    base_url = "http://localhost:8008"
-    
-    module_tests = [
-        {
-            "endpoint": "/analyze/m1",
-            "message": "媽媽忘記關瓦斯",
-            "description": "M1 警訊分析"
-        },
-        {
-            "endpoint": "/analyze/m2", 
-            "message": "爸爸中度失智",
-            "description": "M2 病程階段"
-        },
-        {
-            "endpoint": "/analyze/m3",
-            "message": "爺爺有妄想症狀",
-            "description": "M3 BPSD 症狀"
-        },
-        {
-            "endpoint": "/analyze/m4",
-            "message": "需要醫療協助",
-            "description": "M4 照護需求"
-        }
-    ]
-    
-    print("\n🧪 測試個別模組的 XAI 功能")
+    """測試個別模組端點"""
+    print("\n🧪 個別模組測試")
     print("=" * 50)
     
-    for test in module_tests:
-        print(f"\n📋 測試: {test['description']}")
-        print(f"📝 訊息: {test['message']}")
+    modules = ["M1", "M2", "M3", "M4"]
+    test_input = "我最近記憶力不好"
+    
+    for module in modules:
+        print(f"\n📋 測試 {module} 模組")
         
         try:
             response = requests.post(
-                f"{base_url}{test['endpoint']}",
-                json={"message": test['message'], "user_id": "test_user"},
+                f"http://localhost:8005/analyze/{module}",
+                json={"user_input": test_input},
+                headers={"Content-Type": "application/json"},
                 timeout=10
             )
             
             if response.status_code == 200:
                 result = response.json()
-                print(f"✅ {test['description']} 成功")
+                print(f"✅ {module} 模組回應成功")
+                print(f"📊 模組: {result.get('module', 'N/A')}")
                 
-                # 檢查信心度元素
-                contents = result.get('contents', {})
-                body = contents.get('body', {})
-                body_contents = body.get('contents', [])
-                
-                confidence_found = False
-                reasoning_found = False
-                
-                for element in body_contents:
-                    if isinstance(element, dict):
-                        text = element.get('text', '')
-                        if 'AI 信心度' in text:
-                            confidence_found = True
-                        elif '推理路徑' in text:
-                            reasoning_found = True
-                
-                print(f"🎯 信心度視覺化: {'✅' if confidence_found else '❌'}")
-                print(f"🧠 推理路徑: {'✅' if reasoning_found else '❌'}")
-                
+                if module == "M1":
+                    chunks = result.get('retrieved_chunks', [])
+                    print(f"🔍 找到 {len(chunks)} 個 M1 片段")
+                elif module == "M2":
+                    stage = result.get('stage_detection', {})
+                    print(f"📈 階段檢測: {stage}")
+                elif module == "M3":
+                    bpsd = result.get('bpsd_analysis')
+                    print(f"🧠 BPSD 分析: {bpsd}")
+                elif module == "M4":
+                    suggestions = result.get('action_suggestions', [])
+                    print(f"💡 建議數量: {len(suggestions)}")
+                    
             else:
-                print(f"❌ 請求失敗: {response.status_code}")
+                print(f"❌ {module} 模組錯誤: {response.status_code}")
                 
         except Exception as e:
-            print(f"❌ 測試失敗: {str(e)}")
+            print(f"❌ {module} 模組測試失敗: {e}")
+
+
+def test_health_endpoints():
+    """測試健康檢查端點"""
+    print("\n🏥 健康檢查測試")
+    print("=" * 50)
+    
+    endpoints = [
+        ("/health", "系統健康"),
+        ("/modules/status", "模組狀態"),
+        ("/cache/stats", "快取統計"),
+        ("/gemini/stats", "Gemini 統計")
+    ]
+    
+    for endpoint, description in endpoints:
+        print(f"\n📋 測試 {description}: {endpoint}")
         
-        time.sleep(1)
+        try:
+            response = requests.get(f"http://localhost:8005{endpoint}", timeout=5)
+            
+            if response.status_code == 200:
+                print(f"✅ {description} 端點正常")
+                if endpoint == "/health":
+                    data = response.json()
+                    print(f"📊 狀態: {data.get('status', 'N/A')}")
+                    print(f"🔧 模組: {data.get('modules_status', {})}")
+            else:
+                print(f"❌ {description} 端點錯誤: {response.status_code}")
+                
+        except Exception as e:
+            print(f"❌ {description} 測試失敗: {e}")
+
+
+def test_webhook_status():
+    """測試 Webhook 狀態"""
+    print("\n🌐 Webhook 狀態測試")
+    print("=" * 50)
+    
+    try:
+        # 測試 ngrok webhook
+        response = requests.get("https://0ac6705ad6a2.ngrok-free.app/webhook", timeout=5)
+        
+        if response.status_code == 405:  # Method Not Allowed 是預期的
+            print("✅ Webhook 端點正常 (GET 方法不允許是預期的)")
+        else:
+            print(f"⚠️  Webhook 回應: {response.status_code}")
+            
+    except Exception as e:
+        print(f"❌ Webhook 測試失敗: {e}")
+
+
+def main():
+    """主測試函數"""
+    print("🚀 XAI 視覺化模組完整測試")
+    print("遵循 Cursor IDE 指南")
+    print("=" * 60)
+    
+    # 等待服務啟動
+    print("⏳ 等待服務啟動...")
+    time.sleep(2)
+    
+    # 執行各項測試
+    test_xai_visualization_flow()
+    test_individual_modules()
+    test_health_endpoints()
+    test_webhook_status()
+    
+    print("\n" + "=" * 60)
+    print("🎉 所有測試完成!")
+    print("📊 系統狀態: 運行中")
+    print("🌐 Webhook URL: https://0ac6705ad6a2.ngrok-free.app/webhook")
+
 
 if __name__ == "__main__":
-    print("🚀 啟動 M1-M4 XAI 視覺化測試")
-    
-    # 測試自動模組選擇
-    test_xai_visualization()
-    
-    # 測試個別模組
-    test_individual_modules()
-    
-    print("\n🎉 所有測試完成！") 
+    main() 

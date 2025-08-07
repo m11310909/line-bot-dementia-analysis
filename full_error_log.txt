@@ -1,0 +1,63 @@
+INFO:redis_cache_manager:✅ Redis 連接成功
+INFO:redis_cache_manager:✅ Redis 連接成功
+INFO:optimized_gemini_client:✅ Gemini API 初始化成功
+/Users/yulincho/Documents/GitHub/line-bot-dementia-analysis/enhanced_m1_m2_m3_integrated_api.py:554: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Started server process [89802]
+INFO:     Waiting for application startup.
+INFO:redis_cache_manager:✅ Redis 連接成功
+INFO:redis_cache_manager:✅ Redis 連接成功
+INFO:optimized_gemini_client:✅ Gemini API 初始化成功
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8005 (Press CTRL+C to quit)
+✅ LINE Bot 初始化成功
+🚀 啟動增強版 M1+M2+M3 整合引擎...
+🔍 檢查環境變數...
+✅ LINE_CHANNEL_ACCESS_TOKEN 已設置
+✅ LINE_CHANNEL_SECRET 已設置
+✅ GEMINI_API_KEY 已設置
+✅ LINE Bot 初始化成功
+✅ Redis 快取管理器初始化成功
+✅ 優化 Gemini 客戶端初始化成功
+🚀 初始化 M1+M2+M3 整合引擎...
+📊 載入 M1 資料...
+✅ M1 載入：3 個知識片段
+📊 載入 M2 資料...
+✅ M2 載入：6 個知識片段
+📊 載入 M3 BPSD 資料...
+✅ M3 載入：10 個知識片段
+🎯 總計載入：19 個知識片段
+📋 模組分布：M1(3) + M2(6) + M3(10) = 19
+🔍 建立檢索索引...
+✅ 詞彙庫建立完成：248 個詞彙
+✅ M1+M2+M3 整合引擎初始化完成
+✅ M1+M2+M3 整合引擎初始化成功
+✅ 增強版 M1+M2+M3 整合 API 啟動成功
+INFO:     127.0.0.1:57090 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57092 - "GET /webhook HTTP/1.1" 200 OK
+INFO:     127.0.0.1:57162 - "GET /health HTTP/1.1" 200 OK
+INFO:__main__:[DEBUG] /webhook endpoint 被呼叫
+INFO:__main__:[DEBUG] X-Line-Signature: /3KedyNKns5G56NDxhUBXDDN25RSb7Ef+Iy+YVwRh6g=
+INFO:__main__:[DEBUG] webhook body: b'{"destination":"Uba923c75e676b3d8d7cd8e12a7058564","events":[{"type":"message","message":{"type":"text","id":"573290081096565447","quoteToken":"D2ffUYkAfqb2VIoPE_zaQ2ZdKnoNK7ACZjzMcNdz2fII8uWk_2O7Drvr'
+INFO:__main__:[DEBUG] handle_message 被呼叫
+INFO:__main__:[DEBUG] event.message.text: 我最近常常忘記事情
+INFO:__main__:[DEBUG] event.source.user_id: Ue08a4e22857f264151c9da02bdefc1eb
+INFO:__main__:📨 收到來自 Ue08a4e22857f264151c9da02bdefc1eb 的訊息: 我最近常常忘記事情
+INFO:__main__:[DEBUG] integrated_engine 可用，開始分析...
+INFO:__main__:[DEBUG] 快取未命中，進行新分析
+INFO:__main__:[DEBUG] 新分析結果已快取
+INFO:__main__:[DEBUG] 分析結果類型: <class 'm1_m2_m3_integrated_rag.AnalysisResult'>
+INFO:__main__:[DEBUG] 嘗試發送訊息 (第 1 次)
+INFO:__main__:✅ 訊息發送成功
+INFO:__main__:✅ 文字訊息發送成功
+INFO:__main__:[DEBUG] handler.handle 已執行
+🧠 綜合分析: 我最近常常忘記事情
+🔍 檢索查詢: 我最近常常忘記事情
+📊 找到 5 個相關片段
+INFO:     127.0.0.1:53854 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:54447 - "GET /health HTTP/1.1" 200 OK

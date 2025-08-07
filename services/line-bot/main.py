@@ -173,6 +173,21 @@ async def health_check():
             "timestamp": datetime.now().isoformat()
         }
 
+@app.get("/webhook")
+async def webhook_get():
+    """Handle GET requests to webhook endpoint"""
+    return JSONResponse(
+        status_code=200,
+        content={
+            "message": "LINE Bot Webhook is running",
+            "status": "active",
+            "note": "This endpoint only accepts POST requests from LINE",
+            "webhook_url": "POST /webhook",
+            "health_check": "GET /health",
+            "bot_info": "GET /info"
+        }
+    )
+
 @app.post("/webhook")
 async def webhook(request: Request):
     """LINE Bot webhook endpoint"""

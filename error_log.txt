@@ -1,0 +1,42 @@
+INFO:redis_cache_manager:✅ Redis 連接成功
+INFO:redis_cache_manager:✅ Redis 連接成功
+INFO:optimized_gemini_client:✅ Gemini API 初始化成功
+/Users/yulincho/Documents/GitHub/line-bot-dementia-analysis/enhanced_m1_m2_m3_integrated_api.py:554: DeprecationWarning: 
+        on_event is deprecated, use lifespan event handlers instead.
+
+        Read more about it in the
+        [FastAPI docs for Lifespan Events](https://fastapi.tiangolo.com/advanced/events/).
+        
+  @app.on_event("startup")
+INFO:     Started server process [89039]
+INFO:     Waiting for application startup.
+INFO:redis_cache_manager:✅ Redis 連接成功
+INFO:redis_cache_manager:✅ Redis 連接成功
+INFO:optimized_gemini_client:✅ Gemini API 初始化成功
+INFO:     Application startup complete.
+ERROR:    [Errno 48] error while attempting to bind on address ('0.0.0.0', 8005): [errno 48] address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+✅ LINE Bot 初始化成功
+🚀 啟動增強版 M1+M2+M3 整合引擎...
+🔍 檢查環境變數...
+✅ LINE_CHANNEL_ACCESS_TOKEN 已設置
+✅ LINE_CHANNEL_SECRET 已設置
+✅ GEMINI_API_KEY 已設置
+✅ LINE Bot 初始化成功
+✅ Redis 快取管理器初始化成功
+✅ 優化 Gemini 客戶端初始化成功
+🚀 初始化 M1+M2+M3 整合引擎...
+📊 載入 M1 資料...
+✅ M1 載入：3 個知識片段
+📊 載入 M2 資料...
+✅ M2 載入：6 個知識片段
+📊 載入 M3 BPSD 資料...
+✅ M3 載入：10 個知識片段
+🎯 總計載入：19 個知識片段
+📋 模組分布：M1(3) + M2(6) + M3(10) = 19
+🔍 建立檢索索引...
+✅ 詞彙庫建立完成：248 個詞彙
+✅ M1+M2+M3 整合引擎初始化完成
+✅ M1+M2+M3 整合引擎初始化成功
+✅ 增強版 M1+M2+M3 整合 API 啟動成功

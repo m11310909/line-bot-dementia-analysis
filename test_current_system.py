@@ -63,7 +63,7 @@ def test_current_api():
             start_time = time.time()
             response = requests.post(
                 f"http://localhost:8005/analyze/{test_case['module']}",
-                json={"text": test_case["input"]},
+                json={"user_input": test_case["input"]},
                 timeout=10
             )
             response_time = time.time() - start_time
@@ -106,28 +106,33 @@ def test_current_api():
                 "error": str(e)
             })
     
-    # Summary
+    # Print summary
     print("\n" + "="*50)
     print("📊 Test Summary")
     print("="*50)
     
-    successful_tests = sum(1 for r in results if r.get("success", False))
-    total_tests = len(results)
+    successful = sum(1 for r in results if r.get("success", False))
+    total = len(results)
     
-    print(f"✅ Successful: {successful_tests}/{total_tests}")
+    print(f"✅ Successful: {successful}/{total}")
     
     for result in results:
-        status = "✅" if result.get("success", False) else "❌"
-        print(f"   {status} {result['test']}")
-        if result.get("has_flex"):
-            print(f"      📱 Flex message generated")
+        if result.get("success", False):
+            print(f"   ✅ {result['test']}")
+        else:
+            print(f"   ❌ {result['test']}")
     
     # Save results
     timestamp = time.strftime("%Y%m%d_%H%M%S")
     filename = f"current_system_test_{timestamp}.json"
     
     with open(filename, "w", encoding="utf-8") as f:
-        json.dump(results, f, indent=2, ensure_ascii=False)
+        json.dump({
+            "timestamp": time.strftime("%Y-%m-%d %H:%M:%S"),
+            "total_tests": total,
+            "successful_tests": successful,
+            "results": results
+        }, f, ensure_ascii=False, indent=2)
     
     print(f"\n💾 Results saved to: {filename}")
     print("\n🎉 Test Complete!")

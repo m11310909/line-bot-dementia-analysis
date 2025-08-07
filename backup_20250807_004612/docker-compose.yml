@@ -1,0 +1,167 @@
+version: '3.8'
+
+services:
+  line-bot:
+    build: ./services/line-bot
+    ports:
+      - "8081:8081"
+    environment:
+      - LINE_CHANNEL_ACCESS_TOKEN=${LINE_CHANNEL_ACCESS_TOKEN}
+      - LINE_CHANNEL_SECRET=${LINE_CHANNEL_SECRET}
+      - XAI_API_URL=http://xai-analysis:8005
+      - RAG_API_URL=http://rag-service:8006
+      - ASPECT_VERIFIERS_URL=http://aspect-verifiers:8007
+      - BON_MAV_URL=http://bon-mav:8008
+      - EXTERNAL_URL=${EXTERNAL_URL:-http://localhost:8081}
+    depends_on:
+      - xai-analysis
+      - rag-service
+      - aspect-verifiers
+      - bon-mav
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+  xai-analysis:
+    build: ./services/xai-analysis
+    ports:
+      - "8005:8005"
+    environment:
+      - LOG_LEVEL=INFO
+      - DEBUG=false
+    volumes:
+      - ./logs:/app/logs
+      - ./shared:/app/shared
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+  rag-service:
+    build: ./services/rag-service
+    ports:
+      - "8006:8006"
+    environment:
+      - LOG_LEVEL=INFO
+      - DEBUG=false
+      - GPU_ENABLED=true
+    volumes:
+      - ./logs:/app/logs
+      - ./data:/app/data
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+  aspect-verifiers:
+    build: ./services/aspect-verifiers
+    ports:
+      - "8007:8007"
+    environment:
+      - LOG_LEVEL=INFO
+      - DEBUG=false
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+  bon-mav:
+    build: ./services/bon-mav
+    ports:
+      - "8008:8008"
+    environment:
+      - LOG_LEVEL=INFO
+      - DEBUG=false
+    volumes:
+      - ./logs:/app/logs
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+  monitoring:
+    build: ./services/monitoring
+    ports:
+      - "8009:8009"
+    environment:
+      - LOG_LEVEL=INFO
+      - DEBUG=false
+    volumes:
+      - ./logs:/app/logs
+      - /var/run/docker.sock:/var/run/docker.sock
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+  liff-frontend:
+    build: ./services/liff-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_URL=http://localhost:8081
+      - REACT_APP_LIFF_ID=${LIFF_ID}
+      - REACT_APP_XAI_URL=http://localhost:8005
+      - REACT_APP_VERIFIERS_URL=http://localhost:8007
+      - REACT_APP_MAV_URL=http://localhost:8008
+    depends_on:
+      - line-bot
+      - xai-analysis
+      - aspect-verifiers
+      - bon-mav
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+  postgres:
+    image: postgres:15
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB:-linebot_db}
+      - POSTGRES_USER=${POSTGRES_USER:-linebot_user}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD:-linebot_pass}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+  nginx:
+    image: nginx:alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./ssl:/etc/nginx/ssl
+    depends_on:
+      - line-bot
+      - liff-frontend
+    restart: unless-stopped
+    networks:
+      - line-bot-network
+
+volumes:
+  postgres_data:
+  redis_data:
+
+networks:
+  line-bot-network:
+    driver: bridge 

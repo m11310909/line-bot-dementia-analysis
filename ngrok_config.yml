@@ -1,0 +1,11 @@
+version: 2
+tunnels:
+  webhook:
+    addr: 8005
+    proto: http
+  visualization:
+    addr: 8006
+    proto: http
+  api:
+    addr: 8007
+    proto: http 

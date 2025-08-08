@@ -8,6 +8,7 @@ services:
     environment:
       - LINE_CHANNEL_ACCESS_TOKEN=${LINE_CHANNEL_ACCESS_TOKEN}
       - LINE_CHANNEL_SECRET=${LINE_CHANNEL_SECRET}
+      - EXTERNAL_URL=${EXTERNAL_URL}
       - XAI_SERVICE_URL=http://xai-wrapper:8005
     depends_on:
       xai-wrapper:

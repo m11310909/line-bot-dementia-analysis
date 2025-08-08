@@ -77,7 +77,7 @@ def _get_liff_url() -> str:
 
 def create_simple_m1_response(
     user_text: str, full_text_id: Optional[str] = None
-) -> FlexSendMessage:
+) -> tuple[FlexSendMessage, str]:
     """創建簡單的 M1 回應"""
 
     # 簡單的症狀檢測
@@ -121,6 +121,40 @@ def create_simple_m1_response(
         5: "症狀非常嚴重，建議緊急就醫",
     }
     warning_message = warning_messages.get(warning_level, warning_messages[1])
+
+    # 生成AI小幫手的完整回覆內容
+    ai_response = f"""根據您描述的情況，我進行了失智症警訊徵兆分析：
+
+🔍 **症狀分析：**
+"""
+
+    if symptoms:
+        for symptom, severity in symptoms.items():
+            severity_text = (
+                "輕微" if severity <= 2 else "中等" if severity <= 3 else "嚴重"
+            )
+            ai_response += f"• {symptom}：{severity_text}程度 ({severity}/5)\n"
+    else:
+        ai_response += "• 未檢測到明顯症狀\n"
+
+    ai_response += f"""
+⚠️ **警訊等級：{warning_level}**
+{warning_message}
+
+📊 **AI分析信心度：{confidence_val}%**
+
+💡 **建議：**
+• 定期觀察症狀變化
+• 如有疑慮請諮詢專業醫師
+• 保持健康生活方式
+• 家人陪伴與支持很重要
+
+🔗 **相關資源：**
+• 失智症協會諮詢專線
+• 記憶門診預約
+• 照護者支持團體
+
+如需更詳細的分析，請點擊「深入分析」按鈕。"""
 
     # 創建簡單的 Flex Message
     contents = []
@@ -271,7 +305,7 @@ def create_simple_m1_response(
         }
     )
 
-    return FlexSendMessage(
+    flex_message = FlexSendMessage(
         alt_text="失智症警訊徵兆檢測結果",
         contents={
             "type": "bubble",
@@ -284,6 +318,8 @@ def create_simple_m1_response(
             },
         },
     )
+
+    return flex_message, ai_response
 
 
 class NonLinearNavigationEngine:
@@ -813,11 +849,11 @@ def handle_text_message(event):
 
         logger.info(f"📝 Received message from {user_id}: {user_text[:50]}...")
 
-        # 儲存原文供「看原文」使用
+        # 儲存原文和AI回覆供「看原文」使用
         full_text_id = str(int(datetime.now().timestamp()))
         user_sessions[user_id] = {
             "full_text_id": full_text_id,
-            "full_text": user_text,
+            "user_text": user_text,
             "ts": datetime.now().isoformat(),
         }
 
@@ -832,9 +868,11 @@ def handle_text_message(event):
                 for keyword in ["忘記", "記憶", "健忘", "失憶", "迷路", "混淆"]
             ):
                 # 使用簡單的 M1 處理器
-                flex_message = create_simple_m1_response(
+                flex_message, ai_response = create_simple_m1_response(
                     user_text, full_text_id=full_text_id
                 )
+                # 儲存AI回覆到用戶會話
+                user_sessions[user_id]["ai_response"] = ai_response
                 line_bot_api.reply_message(event.reply_token, flex_message)
                 logger.info("✅ M1 視覺化分析完成")
                 return
@@ -848,9 +886,11 @@ def handle_text_message(event):
                 logger.info(f"✅ Analysis completed for {user_id}")
             else:
                 # 如果 XAI 服務失敗，嘗試使用簡單的 M1 處理器
-                flex_message = create_simple_m1_response(
+                flex_message, ai_response = create_simple_m1_response(
                     user_text, full_text_id=full_text_id
                 )
+                # 儲存AI回覆到用戶會話
+                user_sessions[user_id]["ai_response"] = ai_response
                 line_bot_api.reply_message(event.reply_token, flex_message)
                 logger.info("✅ M1 視覺化分析完成（XAI 服務備用）")
         else:
@@ -864,7 +904,9 @@ def handle_text_message(event):
         # 發生錯誤時，嘗試使用簡單的 M1 處理器作為備用
         try:
             # 注意：此處 user_text 定義於 try 作用域之上
-            flex_message = create_simple_m1_response(user_text)
+            flex_message, ai_response = create_simple_m1_response(user_text)
+            # 儲存AI回覆到用戶會話
+            user_sessions[user_id]["ai_response"] = ai_response
             line_bot_api.reply_message(event.reply_token, flex_message)
             logger.info("✅ M1 視覺化分析完成（錯誤處理備用）")
         except Exception as backup_error:
@@ -927,11 +969,11 @@ def handle_postback(event):
                 line_bot_api.reply_message(event.reply_token, error_message)
 
         elif postback_data.startswith("view=original"):
-            # 回覆完整原文（若存在）
+            # 回覆AI小幫手的完整回覆內容
             session = user_sessions.get(user_id, {})
-            full_text = session.get("full_text") or "（找不到原始訊息內容）"
+            ai_response = session.get("ai_response") or "（找不到AI回覆內容）"
             line_bot_api.reply_message(
-                event.reply_token, TextSendMessage(text=full_text)
+                event.reply_token, TextSendMessage(text=ai_response)
             )
 
         elif postback_data.startswith("view=frame36"):

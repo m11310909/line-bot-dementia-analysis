@@ -135,3 +135,4 @@ Your LINE Bot webhook is now fully operational with the 405 error completely res
 ```
 https://430d701dac1e.ngrok-free.app/webhook
 ```
+

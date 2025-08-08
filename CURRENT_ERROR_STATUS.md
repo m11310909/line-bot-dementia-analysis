@@ -172,3 +172,4 @@ text_response = f"""🧠 失智症分析結果
 - Comprehensive monitoring
 
 **The LINE Bot is now running without any critical errors!** 🚀✅
+

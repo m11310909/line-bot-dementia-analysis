@@ -144,3 +144,4 @@ https://430d701dac1e.ngrok-free.app/webhook
 ```
 
 **Test it by sending a message to your LINE Bot - you should now see a rich Flex message response!** 🎨
+

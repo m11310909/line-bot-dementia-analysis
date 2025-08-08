@@ -289,6 +289,36 @@ async def call_rag_service(query: str) -> Dict[str, Any]:
         return {"success": False, "error": str(e)}
 
 
+def call_xai_analysis_sync(text: str, user_id: str) -> Dict[str, Any]:
+    """Call XAI analysis service (synchronous version)"""
+    try:
+        response = requests.post(
+            f"{XAI_API_URL}/comprehensive-analysis",
+            json={"text": text, "user_id": user_id, "include_visualization": True},
+            timeout=30,
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"XAI analysis failed: {e}")
+        return {"success": False, "error": str(e)}
+
+
+def call_rag_service_sync(query: str) -> Dict[str, Any]:
+    """Call RAG service (synchronous version)"""
+    try:
+        response = requests.post(
+            f"{RAG_API_URL}/search",
+            json={"query": query, "top_k": 3, "threshold": 0.5, "use_gpu": True},
+            timeout=30,
+        )
+        response.raise_for_status()
+        return response.json()
+    except Exception as e:
+        logger.error(f"RAG search failed: {e}")
+        return {"success": False, "error": str(e)}
+
+
 def create_analysis_flex_message(
     analysis_result: Dict[str, Any], user_text: str
 ) -> FlexSendMessage:
@@ -516,7 +546,7 @@ def create_welcome_flex_message() -> FlexSendMessage:
 
 
 @handler.add(MessageEvent, message=TextMessage)
-async def handle_text_message(event):
+def handle_text_message(event):
     """Handle text messages with non-linear navigation"""
     try:
         user_id = event.source.user_id
@@ -530,7 +560,7 @@ async def handle_text_message(event):
         # If specific modules detected, perform analysis
         if intent["detected_modules"]:
             # Perform comprehensive analysis
-            analysis_result = await call_xai_analysis(user_text, user_id)
+            analysis_result = call_xai_analysis_sync(user_text, user_id)
 
             if analysis_result.get("success"):
                 flex_message = create_analysis_flex_message(analysis_result, user_text)
@@ -550,7 +580,7 @@ async def handle_text_message(event):
 
 
 @handler.add(PostbackEvent)
-async def handle_postback(event):
+def handle_postback(event):
     """Handle postback events for non-linear navigation"""
     try:
         user_id = event.source.user_id
@@ -568,7 +598,7 @@ async def handle_postback(event):
             module_id = postback_data.replace("analyze_", "")
 
             # Perform single module analysis
-            analysis_result = await call_xai_analysis(
+            analysis_result = call_xai_analysis_sync(
                 f"請分析{module_id}相關內容", user_id
             )
 
@@ -583,7 +613,7 @@ async def handle_postback(event):
 
         elif postback_data == "knowledge_search":
             # Perform knowledge search
-            rag_result = await call_rag_service("失智症照護知識")
+            rag_result = call_rag_service_sync("失智症照護知識")
 
             if rag_result.get("success") and rag_result.get("results"):
                 knowledge_text = "📚 相關知識：\n\n"
